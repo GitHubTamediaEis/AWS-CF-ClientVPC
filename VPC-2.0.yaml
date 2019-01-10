@@ -91,7 +91,16 @@ Parameters:
     Type: String
     Description: IP address of the *new* customer gateway
     Default: none
-    
+  
+  UseCustomizedDNSParameters:
+    Type: String
+    Default: "no"
+    Description: Customize DNS resolution parameters (NO/yes) 
+    AllowedValues: 
+      - "yes"
+      - "no"
+    ConstraintDescription: Value must be either "yes" or "no".
+  
   DnsDomainName:
     Type: String
     Default: eu-west-1.compute.internal
@@ -166,6 +175,7 @@ Metadata:
           - PeerVpcPrivateRouteTable
       - Label: { default: DHCP options }
         Parameters:
+          - UseCustomizedDNSParameters
           - DnsDomainName
           - DnsServers
           - NtpServers
@@ -215,6 +225,7 @@ Conditions:
   CreateVpn: !Or [!Not [!Equals [ !Ref CustomerGatewayId, none ]], !Not [!Equals [ !Ref CustomerGatewayAddress, none ]]]
   CreateCustomerGateway: !Not [!Equals [ !Ref CustomerGatewayAddress, none ]]
   CreateS3EndPoint: !Equals [ !Ref UseS3EndPoint, "yes" ]
+  DefineCustomDNSParameters: !Equals [ !Ref UseCustomizedDNSParameters, "yes" ]
 
 Resources:
 
@@ -423,6 +434,7 @@ Resources:
 
   DhcpOptions:
     Type: AWS::EC2::DHCPOptions
+    Condition: DefineCustomDNSParameters
     Properties:
       DomainName: !Ref DnsDomainName
       DomainNameServers: !Ref DnsServers
@@ -433,6 +445,7 @@ Resources:
 
   AttachDhcpOptions:
     Type: AWS::EC2::VPCDHCPOptionsAssociation
+    Condition: DefineCustomDNSParameters
     Properties: 
       DhcpOptionsId: !Ref DhcpOptions
       VpcId: !Ref Vpc
