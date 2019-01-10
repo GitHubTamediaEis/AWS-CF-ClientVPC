@@ -1,2 +1,2 @@
-# AWS-CF-VPC-2.0
-VPC for Nephelai 2.0
+# AWS-CF-VPC
+AWS Cloud formation - Stack VPC

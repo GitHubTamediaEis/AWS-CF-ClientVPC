@@ -1,0 +1,30 @@
+{  
+   "Parameters":{  
+      "UseS3EndPoint":"yes",
+      "CustomerGatewayAddress":"145.234.241.70",
+      "CustomerGatewayId":"none",
+      "DnsDomainName":"mediait.ch",
+      "DnsServers":"10.64.64.10,10.64.96.10",
+      "NtpServers":"10.64.64.10,10.64.96.10",
+      "PeerVpc":"none",
+      "PeerVpcCidr":"",
+      "PeerVpcPrivateRouteTable":"",
+      "PeerVpcPublicRouteTable":"",
+      "VpcCidrBlock":"10.64.0.0/16",
+      "Zone1":"eu-west-1a",
+      "Zone1CidrBlockPrivate":"10.64.64.0/19",
+      "Zone1CidrBlockPublic":"10.64.16.0/21",
+      "Zone2":"eu-west-1b",
+      "Zone2CidrBlockPrivate":"10.64.96.0/19",
+      "Zone2CidrBlockPublic":"10.64.24.0/21",
+      "Zone3":"eu-west-1c",
+      "Zone3CidrBlockPrivate":"10.64.128.0/19",
+      "Zone3CidrBlockPublic":"10.64.32.0/21"
+   },
+   "Tags":{  
+      "Owner":"romain.schwery@tamedia.ch",
+      "Landscape":"Prod",
+      "CostCenter":"2489",
+      "SupportedBy":"network@tamedia.ch"
+   }
+}
