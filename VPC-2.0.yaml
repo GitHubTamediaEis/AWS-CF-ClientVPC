@@ -871,11 +871,13 @@ Outputs:
       Name: !Sub ${AWS::StackName}-InternetGateway
 
   VpnGateway:
+    Condition: CreateVpn
     Value: !Ref VpnGateway
     Export:
       Name: !Sub ${AWS::StackName}-VpnGateway
 
   DhcpOptions:
+    Condition: DefineCustomDNSParameters
     Value: !Ref DhcpOptions
     Export:
       Name: !Sub ${AWS::StackName}-DhcpOptions
