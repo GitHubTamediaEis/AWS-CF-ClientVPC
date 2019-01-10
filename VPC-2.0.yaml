@@ -1,0 +1,888 @@
+---
+AWSTemplateFormatVersion: 2010-09-09
+Description: Setup a VPC with private and public subnets in three AZs. Includes one NAT- and one Internet-Gateway. Optional IPsec VPN and peering with a Mgmt-VPC.
+
+Parameters:
+
+  VpcCidrBlock:
+    Type: String
+    Description: The CIDR Block to use for the Vpc
+    Default: 10.64.0.0/16
+    MinLength: 9
+    MaxLength: 18
+    AllowedPattern: '(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/(\d{1,2})'
+    ConstraintDescription: Must be a valid IP CIDR range of the form x.x.x.x/x.
+  
+  Zone1:
+    Type: AWS::EC2::AvailabilityZone::Name
+    Description: Select the zone that will be used as AZ1
+    Default: eu-west-1a
+
+  Zone1CidrBlockPublic:
+    Type: String
+    Description: The CIDR Block for the public subnet in AZ1.
+    Default: 10.64.16.0/21
+    MinLength: 9
+    MaxLength: 18
+    AllowedPattern: '(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/(\d{1,2})'
+    ConstraintDescription: Must be a valid IP CIDR range of the form x.x.x.x/x.
+
+  Zone1CidrBlockPrivate:
+    Type: String
+    Description: The CIDR Block for the private subnet in AZ1.
+    Default: 10.64.64.0/19
+    MinLength: 9
+    MaxLength: 18
+    AllowedPattern: '(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/(\d{1,2})'
+    ConstraintDescription: Must be a valid IP CIDR range of the form x.x.x.x/x.
+
+  Zone2:
+    Type: AWS::EC2::AvailabilityZone::Name
+    Description: Select the zone that will be used as AZ2
+    Default: eu-west-1b
+
+  Zone2CidrBlockPublic:
+    Type: String
+    Description: The CIDR Block for the public subnet in AZ2.
+    Default: 10.64.24.0/21
+    MinLength: 9
+    MaxLength: 18
+    AllowedPattern: '(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/(\d{1,2})'
+    ConstraintDescription: Must be a valid IP CIDR range of the form x.x.x.x/x.
+
+  Zone2CidrBlockPrivate:
+    Type: String
+    Description: The CIDR Block for the private subnet in AZ2.
+    Default: 10.64.96.0/19
+    MinLength: 9
+    MaxLength: 18
+    AllowedPattern: '(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/(\d{1,2})'
+    ConstraintDescription: Must be a valid IP CIDR range of the form x.x.x.x/x.
+
+  Zone3:
+    Type: AWS::EC2::AvailabilityZone::Name
+    Description: Select the zone that will be used as AZ3
+    Default: eu-west-1c
+
+  Zone3CidrBlockPublic:
+    Type: String
+    Description: The CIDR Block for the public subnet in AZ3.
+    Default: 10.64.32.0/21
+    MinLength: 9
+    MaxLength: 18
+    AllowedPattern: '(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/(\d{1,2})'
+    ConstraintDescription: Must be a valid IP CIDR range of the form x.x.x.x/x.
+
+  Zone3CidrBlockPrivate:
+    Type: String
+    Description: The CIDR Block for the private subnet in AZ3.
+    Default: 10.64.128.0/19
+    MinLength: 9
+    MaxLength: 18
+    AllowedPattern: '(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/(\d{1,2})'
+    ConstraintDescription: Must be a valid IP CIDR range of the form x.x.x.x/x.
+    
+  CustomerGatewayId:
+    Type: String
+    Default: none
+    Description: ID of the *existing* customer gateway
+
+  CustomerGatewayAddress:
+    Type: String
+    Description: IP address of the *new* customer gateway
+    Default: none
+    
+  DnsDomainName:
+    Type: String
+    Default: eu-west-1.compute.internal
+    Description: DNS domain name (included in DHCP options)
+    
+  DnsServers:
+    Type: CommaDelimitedList
+    Default: 10.64.64.10, 10.64.96.10
+    Description: DNS server address(es) (included in DHCP options)
+    
+  NtpServers:
+    Type: CommaDelimitedList
+    Default: 10.64.64.10, 10.64.96.10
+    Description: NTP server address(es) (included in DHCP options)
+    
+  PeerVpc:
+    Type: String
+    Default: none
+    Description: ID of the shared services Vpc
+    
+  PeerVpcCidr:
+    Type: String
+    Description: IP CIDR range of the peer Vpc
+
+  PeerVpcPublicRouteTable:
+    Type: String
+    Description: ID of the public route table of the peer Vpc
+    
+  PeerVpcPrivateRouteTable:
+    Type: String
+    Description: ID of the private route table of the peer Vpc    
+  
+  UseS3EndPoint:
+    Type: String
+    Default: "no"
+    Description: Create a VPC Endpoint to access S3 (NO/yes) 
+    AllowedValues: 
+      - "yes"
+      - "no"
+    ConstraintDescription: Value must be either "yes" or "no".
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label: { default: Vpc IP range }
+        Parameters:
+          - VpcCidrBlock
+      - Label: { default: AZ1 network setup }
+        Parameters:
+          - Zone1
+          - Zone1CidrBlockPublic
+          - Zone1CidrBlockPrivate
+      - Label: { default: AZ2 network setup }
+        Parameters:
+          - Zone2
+          - Zone2CidrBlockPublic
+          - Zone2CidrBlockPrivate
+      - Label: { default: AZ3 network setup }
+        Parameters:
+          - Zone3
+          - Zone3CidrBlockPublic
+          - Zone3CidrBlockPrivate
+      - Label: { default: Customer gateway for VPN (NEW or EXISTING -> only fill one!) }
+        Parameters:
+          - CustomerGatewayAddress
+          - CustomerGatewayId
+      - Label: { default: Shared services Vpc peering }
+        Parameters:
+          - PeerVpc
+          - PeerVpcCidr
+          - PeerVpcPublicRouteTable
+          - PeerVpcPrivateRouteTable
+      - Label: { default: DHCP options }
+        Parameters:
+          - DnsDomainName
+          - DnsServers
+          - NtpServers
+
+    ParameterLabels:
+      VpcCidrBlock:
+        default: CIDR block for the Vpc
+      Zone1:
+        default: First AZ
+      Zone1CidrBlockPublic:
+        default: First AZ public subnet
+      Zone1CidrBlockPrivate:
+        default: First AZ private subnet
+      Zone2:
+        default: Second AZ
+      Zone2CidrBlockPublic:
+        default: Second AZ public subnet
+      Zone2CidrBlockPrivate:
+        default: Second AZ private subnet
+      Zone3:
+        default: Third AZ
+      Zone3CidrBlockPublic:
+        default: Third AZ public subnet
+      Zone3CidrBlockPrivate:
+        default: Third AZ private subnet
+      CustomerGatewayId:
+        default: ID of the *existing* customer gateway
+      CustomerGatewayAddress:
+        default: IP address of the *new* customer gateway
+      DnsDomainName:
+        default: DNS domain name
+      DnsServers:
+        default: DNS servers, comma delimited
+      NtpServers:
+        default: NTP servers, comma delimited
+      PeerVpc:
+        default: Peer Vpc ID
+      PeerVpcCidr:
+        default: Peer Vpc IP CIDR
+      PeerVpcPublicRouteTable:
+        default: ID of the public route table of the peer VPC
+      PeerVpcPrivateRouteTable:
+        default: ID of the private route table of the peer VPC
+
+Conditions:
+  CreateVpcPeering: !Not [!Equals [ !Ref PeerVpc, none ]]
+  CreateVpn: !Or [!Not [!Equals [ !Ref CustomerGatewayId, none ]], !Not [!Equals [ !Ref CustomerGatewayAddress, none ]]]
+  CreateCustomerGateway: !Not [!Equals [ !Ref CustomerGatewayAddress, none ]]
+  CreateS3EndPoint: !Equals [ !Ref UseS3EndPoint, "yes" ]
+
+Resources:
+
+# Setup the main Vpc component
+
+  Vpc:
+    Type: AWS::EC2::VPC
+    Properties:
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      CidrBlock: !Ref VpcCidrBlock
+      Tags:
+      - Key: Name
+        Value: !Sub ${AWS::StackName}
+
+# Setup the primary public subnet
+
+  Public1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Ref Zone1
+      VpcId: !Ref Vpc
+      CidrBlock: !Ref Zone1CidrBlockPublic
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName}-Public1
+
+# Setup the secondary public subnet
+
+  Public2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Ref Zone2
+      VpcId: !Ref Vpc
+      CidrBlock: !Ref Zone2CidrBlockPublic
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName}-Public2
+
+# Setup the third public subnet
+
+  Public3:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Ref Zone3
+      VpcId: !Ref Vpc
+      CidrBlock: !Ref Zone3CidrBlockPublic
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName}-Public3
+
+# Setup the primary private subnet
+
+  Private1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Ref Zone1
+      VpcId: !Ref Vpc
+      CidrBlock: !Ref Zone1CidrBlockPrivate
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName}-Private1
+
+# Setup the secondary private subnet
+
+  Private2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Ref Zone2
+      VpcId: !Ref Vpc
+      CidrBlock: !Ref Zone2CidrBlockPrivate
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName}-Private2
+
+# Setup the third private subnet
+
+  Private3:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Ref Zone3
+      VpcId: !Ref Vpc
+      CidrBlock: !Ref Zone3CidrBlockPrivate
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName}-Private3
+
+# Setup the internet gateway
+
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+     Tags:
+       - Key: Name
+         Value: !Sub ${AWS::StackName}-InternetGateway
+
+# Attach the internet gateway to the Vpc
+
+  AttachGateway:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref Vpc
+      InternetGatewayId: !Ref InternetGateway
+
+  VpnGateway:
+    Type: AWS::EC2::VPNGateway
+    Condition: CreateVpn
+    Properties:
+      Type: ipsec.1
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName}-VpnGateway
+
+  CustomerVpnGateway:  
+    Type: "AWS::EC2::CustomerGateway"
+    Condition: CreateCustomerGateway
+    Properties:
+      BgpAsn: 65000
+      IpAddress: !Ref CustomerGatewayAddress
+      Type: ipsec.1
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName}-CustomerGateway
+
+  VpnConnection:
+    Type: AWS::EC2::VPNConnection
+    Condition: CreateVpn
+    Properties:
+      Type: ipsec.1
+      StaticRoutesOnly: true
+      VpnGatewayId: !Ref VpnGateway
+      CustomerGatewayId: !If [CreateCustomerGateway, !Ref CustomerVpnGateway, !Ref CustomerGatewayId]
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName}-VpnConnection
+
+  VpnConnectionRoute:
+    Type: AWS::EC2::VPNConnectionRoute
+    Condition: CreateVpn
+    Properties:
+      VpnConnectionId: !Ref VpnConnection
+      DestinationCidrBlock: 145.234.0.0/16
+
+  VpnConnectionRoute2:
+    Type: AWS::EC2::VPNConnectionRoute
+    Condition: CreateVpn
+    Properties:
+      VpnConnectionId: !Ref VpnConnection
+      DestinationCidrBlock: 10.30.0.0/16
+
+  VpnConnectionRoute3:
+    Type: AWS::EC2::VPNConnectionRoute
+    Condition: CreateVpn
+    Properties:
+      VpnConnectionId: !Ref VpnConnection
+      DestinationCidrBlock: 10.24.0.0/16     
+
+  VpnConnectionRoute4:
+      Type: AWS::EC2::VPNConnectionRoute
+      Condition: CreateVpn
+      Properties:
+        VpnConnectionId: !Ref VpnConnection
+        DestinationCidrBlock: 10.0.240.0/23  
+
+  VpnConnectionRoute5:
+      Type: AWS::EC2::VPNConnectionRoute
+      Condition: CreateVpn
+      Properties:
+        VpnConnectionId: !Ref VpnConnection
+        DestinationCidrBlock: 10.0.249.0/24
+
+  VpnConnectionRoute6:
+      Type: AWS::EC2::VPNConnectionRoute
+      Condition: CreateVpn
+      Properties:
+        VpnConnectionId: !Ref VpnConnection
+        DestinationCidrBlock: 10.0.250.0/24      
+
+  VpnConnectionRoute7:
+      Type: AWS::EC2::VPNConnectionRoute
+      Condition: CreateVpn
+      Properties:
+        VpnConnectionId: !Ref VpnConnection
+        DestinationCidrBlock: 10.100.4.0/22      
+
+  AttachVpnGateway:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Condition: CreateVpn
+    Properties:
+      VpcId: !Ref Vpc
+      VpnGatewayId: !Ref VpnGateway
+
+  NatGatewayEip:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: Vpc
+
+  NatGateway:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt NatGatewayEip.AllocationId
+      SubnetId: !Ref Public1
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName}-NatGateway
+
+  DhcpOptions:
+    Type: AWS::EC2::DHCPOptions
+    Properties:
+      DomainName: !Ref DnsDomainName
+      DomainNameServers: !Ref DnsServers
+      NtpServers: !Ref NtpServers
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName}-DhcpOptions
+
+  AttachDhcpOptions:
+    Type: AWS::EC2::VPCDHCPOptionsAssociation
+    Properties: 
+      DhcpOptionsId: !Ref DhcpOptions
+      VpcId: !Ref Vpc
+
+  VpcPeering:
+    Type: "AWS::EC2::VPCPeeringConnection"
+    Condition: CreateVpcPeering
+    Properties: 
+      PeerVpcId: !Ref PeerVpc
+      VpcId: !Ref Vpc
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName}-MgmtVpcPeering
+
+# Setup a public route table
+
+  RouteTablePublic:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref Vpc
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName}-Public
+
+# Setup the primary private route table
+
+  RouteTablePrivate:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref Vpc
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName}-Private
+
+# Add routes for public subnets
+
+  PeeringRoutePublic:
+    Type: AWS::EC2::Route
+    DependsOn: VpcPeering
+    Condition: CreateVpcPeering
+    Properties:
+      RouteTableId: !Ref RouteTablePublic
+      DestinationCidrBlock: !Ref PeerVpcCidr
+      VpcPeeringConnectionId: !Ref VpcPeering      
+
+  PeeringRoutePublicPeerVpc:
+    Type: AWS::EC2::Route
+    DependsOn: VpcPeering
+    Condition: CreateVpcPeering
+    Properties:
+      RouteTableId: !Ref PeerVpcPublicRouteTable
+      DestinationCidrBlock: !Ref VpcCidrBlock
+      VpcPeeringConnectionId: !Ref VpcPeering
+
+  InternetRoutePublic:
+    Type: AWS::EC2::Route
+    DependsOn: AttachGateway
+    Properties:
+      RouteTableId: !Ref RouteTablePublic
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+
+  VpnRoutePublic:
+    Type: AWS::EC2::Route
+    DependsOn: AttachVpnGateway
+    Condition: CreateVpn
+    Properties:
+      RouteTableId: !Ref RouteTablePublic
+      DestinationCidrBlock: 145.234.0.0/16
+      GatewayId: !Ref VpnGateway
+
+  VpnRoutePublic2:
+    Type: AWS::EC2::Route
+    DependsOn: AttachVpnGateway
+    Condition: CreateVpn
+    Properties:
+      RouteTableId: !Ref RouteTablePublic
+      DestinationCidrBlock: 10.30.0.0/16
+      GatewayId: !Ref VpnGateway
+
+  VpnRoutePublic3:
+    Type: AWS::EC2::Route
+    DependsOn: AttachVpnGateway
+    Condition: CreateVpn
+    Properties:
+      RouteTableId: !Ref RouteTablePublic
+      DestinationCidrBlock: 10.24.0.0/16
+      GatewayId: !Ref VpnGateway         
+
+  VpnRoutePublic4:
+    Type: AWS::EC2::Route
+    DependsOn: AttachVpnGateway
+    Condition: CreateVpn
+    Properties:
+      RouteTableId: !Ref RouteTablePublic
+      DestinationCidrBlock: 10.0.240.0/23
+      GatewayId: !Ref VpnGateway
+
+  VpnRoutePublic5:
+    Type: AWS::EC2::Route
+    DependsOn: AttachVpnGateway
+    Condition: CreateVpn
+    Properties:
+      RouteTableId: !Ref RouteTablePublic
+      DestinationCidrBlock: 10.0.249.0/24
+      GatewayId: !Ref VpnGateway
+
+  VpnRoutePublic6:
+    Type: AWS::EC2::Route
+    DependsOn: AttachVpnGateway
+    Condition: CreateVpn
+    Properties:
+      RouteTableId: !Ref RouteTablePublic
+      DestinationCidrBlock: 10.0.250.0/24
+      GatewayId: !Ref VpnGateway
+
+  VpnRoutePublic7:
+    Type: AWS::EC2::Route
+    DependsOn: AttachVpnGateway
+    Condition: CreateVpn
+    Properties:
+      RouteTableId: !Ref RouteTablePublic
+      DestinationCidrBlock: 10.100.4.0/22
+      GatewayId: !Ref VpnGateway
+
+  DmzRoutePublic:
+    Type: AWS::EC2::Route
+    DependsOn: AttachGateway
+    Properties:
+      RouteTableId: !Ref RouteTablePublic
+      DestinationCidrBlock: 145.234.240.0/22
+      GatewayId: !Ref InternetGateway
+
+# Add routes for private subnets
+
+  PeeringRoutePrivate:
+    Type: AWS::EC2::Route
+    DependsOn: VpcPeering
+    Condition: CreateVpcPeering
+    Properties:
+      RouteTableId: !Ref RouteTablePrivate
+      DestinationCidrBlock: !Ref PeerVpcCidr
+      VpcPeeringConnectionId: !Ref VpcPeering 
+
+  PeeringRoutePrivatePeerVpc:
+    Type: AWS::EC2::Route
+    DependsOn: VpcPeering
+    Condition: CreateVpcPeering
+    Properties:
+      RouteTableId: !Ref PeerVpcPrivateRouteTable
+      DestinationCidrBlock: !Ref VpcCidrBlock
+      VpcPeeringConnectionId: !Ref VpcPeering      
+
+  VpnRoutePrivate:
+    Type: AWS::EC2::Route
+    DependsOn: AttachVpnGateway
+    Condition: CreateVpn
+    Properties:
+      RouteTableId: !Ref RouteTablePrivate
+      DestinationCidrBlock: 145.234.0.0/16
+      GatewayId: !Ref VpnGateway
+
+  VpnRoutePrivate2:
+    Type: AWS::EC2::Route
+    DependsOn: AttachVpnGateway
+    Condition: CreateVpn
+    Properties:
+      RouteTableId: !Ref RouteTablePrivate
+      DestinationCidrBlock: 10.30.0.0/16
+      GatewayId: !Ref VpnGateway      
+
+  VpnRoutePrivate3:
+    Type: AWS::EC2::Route
+    DependsOn: AttachVpnGateway
+    Condition: CreateVpn
+    Properties:
+      RouteTableId: !Ref RouteTablePrivate
+      DestinationCidrBlock: 10.24.0.0/16
+      GatewayId: !Ref VpnGateway         
+
+  VpnRoutePrivate4:
+    Type: AWS::EC2::Route
+    DependsOn: AttachVpnGateway
+    Condition: CreateVpn
+    Properties:
+      RouteTableId: !Ref RouteTablePrivate
+      DestinationCidrBlock: 10.0.240.0/23
+      GatewayId: !Ref VpnGateway
+
+  VpnRoutePrivate5:
+    Type: AWS::EC2::Route
+    DependsOn: AttachVpnGateway
+    Condition: CreateVpn
+    Properties:
+      RouteTableId: !Ref RouteTablePrivate
+      DestinationCidrBlock: 10.0.249.0/24
+      GatewayId: !Ref VpnGateway
+
+  VpnRoutePrivate6:
+    Type: AWS::EC2::Route
+    DependsOn: AttachVpnGateway
+    Condition: CreateVpn
+    Properties:
+      RouteTableId: !Ref RouteTablePrivate
+      DestinationCidrBlock: 10.0.250.0/24
+      GatewayId: !Ref VpnGateway
+
+  VpnRoutePrivate7:
+    Type: AWS::EC2::Route
+    DependsOn: AttachVpnGateway
+    Condition: CreateVpn
+    Properties:
+      RouteTableId: !Ref RouteTablePrivate
+      DestinationCidrBlock: 10.100.4.0/22
+      GatewayId: !Ref VpnGateway
+
+  DmzRoutePrivate1: # Exception for RAS-TAM DMZ to be routed via VPN
+    Type: AWS::EC2::Route
+    DependsOn: AttachVpnGateway
+    Condition: CreateVpn
+    Properties:
+      RouteTableId: !Ref RouteTablePrivate
+      DestinationCidrBlock: 145.234.241.0/27
+      GatewayId: !Ref VpnGateway
+
+  DmzRoutePrivate:
+    Type: AWS::EC2::Route
+    DependsOn: NatGateway
+    Properties:
+      RouteTableId: !Ref RouteTablePrivate
+      DestinationCidrBlock: 145.234.240.0/22
+      NatGatewayId: !Ref NatGateway
+
+  NatRoutePrivate:
+    Type: AWS::EC2::Route
+    DependsOn: NatGateway
+    Properties:
+      RouteTableId: !Ref RouteTablePrivate
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NatGateway
+
+# Associate the Public route table to the the first public subnet
+
+  SubnetRouteTableAssociationPublic1:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref Public1
+      RouteTableId: !Ref RouteTablePublic
+
+# Associate the Public route table to the the second public subnet
+
+  SubnetRouteTableAssociationPublic2:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref Public2
+      RouteTableId: !Ref RouteTablePublic
+
+# Associate the Public route table to the the third public subnet
+
+  SubnetRouteTableAssociationPublic3:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref Public3
+      RouteTableId: !Ref RouteTablePublic
+
+# Associate the primary Private route table to the the first private subnet
+
+  SubnetRouteTableAssociationPrivate1:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref Private1
+      RouteTableId: !Ref RouteTablePrivate
+
+# Associate the Secondary Private route table to the the second private subnet
+
+  SubnetRouteTableAssociationPrivate2:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref Private2
+      RouteTableId: !Ref RouteTablePrivate
+
+# Associate the Secondary Private route table to the the third private subnet
+
+  SubnetRouteTableAssociationPrivate3:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref Private3
+      RouteTableId: !Ref RouteTablePrivate
+
+  SecGrpDefaultAccess:
+    Type: AWS::EC2::SecurityGroup
+    Condition: CreateVpn
+    Properties:
+      VpcId: !Ref Vpc
+      GroupName: !Sub ${AWS::StackName}-DefaultAccess
+      GroupDescription: Default access rules for Mgmt, Monitoring, AntiVirus and the like.
+      SecurityGroupIngress:
+        #SSH Management from 145.234.0.0/16
+        - IpProtocol: tcp
+          CidrIp: 145.234.0.0/16
+          FromPort: 22
+          ToPort: 22
+        #RDP Management from 145.234.0.0/16
+        - IpProtocol: tcp
+          CidrIp: 145.234.0.0/16
+          FromPort: 3389
+          ToPort: 3389
+        #TrendMicro from s7380
+        - IpProtocol: tcp
+          CidrIp: 145.234.72.123/32
+          FromPort: 4118
+          ToPort: 4118
+        #TrendMicro from s7387
+        - IpProtocol: tcp
+          CidrIp: 145.234.72.117/32
+          FromPort: 4118
+          ToPort: 4118
+        #SNMP from s6612 (cMK Bern active)
+        - IpProtocol: udp
+          CidrIp: 145.234.70.181/32
+          FromPort: 161
+          ToPort: 161
+        #SNMP from s6613 (cMK Bern passive)
+        - IpProtocol: udp
+          CidrIp: 145.234.70.182/32
+          FromPort: 161
+          ToPort: 161
+        #ICMP (Ping) from 145.234.0.0/16
+        - IpProtocol: icmp
+          CidrIp: 145.234.0.0/16
+          FromPort: -1
+          ToPort: -1
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName}-DefaultAccess
+          
+# Setup S3 VPC Endpoint if required
+                  
+  S3Endpoint:
+    Type: 'AWS::EC2::VPCEndpoint'
+    Condition: CreateS3EndPoint
+    Properties:    
+      RouteTableIds:
+        - !Ref RouteTablePrivate
+      ServiceName: !Sub com.amazonaws.${AWS::Region}.s3
+      VpcId: !Ref Vpc
+
+Outputs:
+
+  Vpc:
+    Value: !Ref Vpc
+    Export:
+      Name: !Sub ${AWS::StackName}
+
+  Zone1:
+    Value: !Ref Zone1
+    Export:
+      Name: !Sub ${AWS::StackName}-Zone1
+
+  Zone2:
+    Value: !Ref Zone2
+    Export:
+      Name: !Sub ${AWS::StackName}-Zone2
+
+  Zone3:
+    Value: !Ref Zone3
+    Export:
+      Name: !Sub ${AWS::StackName}-Zone3
+
+  Public1:
+    Value: !Ref Public1
+    Export:
+      Name: !Sub ${AWS::StackName}-Public1
+
+  Public2:
+    Value: !Ref Public2
+    Export:
+      Name: !Sub ${AWS::StackName}-Public2
+
+  Public3:
+    Value: !Ref Public3
+    Export:
+      Name: !Sub ${AWS::StackName}-Public3
+
+  Private1:
+    Value: !Ref Private1
+    Export:
+      Name: !Sub ${AWS::StackName}-Private1
+
+  Private2:
+    Value: !Ref Private2
+    Export:
+      Name: !Sub ${AWS::StackName}-Private2
+      
+  Private3:
+    Value: !Ref Private3
+    Export:
+      Name: !Sub ${AWS::StackName}-Private3
+
+  RouteTablePrivate:
+    Value: !Ref RouteTablePrivate
+    Export:
+      Name: !Sub ${AWS::StackName}-RouteTablePrivate
+
+  RouteTablePublic:
+    Value: !Ref RouteTablePublic
+    Export:
+      Name: !Sub ${AWS::StackName}-RouteTablePublic
+
+  NatGateway:
+    Value: !Ref NatGateway
+    Export:
+      Name: !Sub ${AWS::StackName}-NatGateway
+
+  NatGatewayEip:
+    Value: !Ref NatGatewayEip
+    Export:
+      Name: !Sub ${AWS::StackName}-NatGatewayEip
+
+  InternetGateway:
+    Value: !Ref InternetGateway
+    Export:
+      Name: !Sub ${AWS::StackName}-InternetGateway
+
+  VpnGateway:
+    Value: !Ref VpnGateway
+    Export:
+      Name: !Sub ${AWS::StackName}-VpnGateway
+
+  DhcpOptions:
+    Value: !Ref DhcpOptions
+    Export:
+      Name: !Sub ${AWS::StackName}-DhcpOptions
+
+  VpcPeering:
+    Condition: CreateVpcPeering
+    Value: !Ref VpcPeering
+    Export:
+      Name: !Sub ${AWS::StackName}-MgmtVpcPeering
+
+  SecGrpDefaultAccess:
+    Condition: CreateVpn
+    Value: !Ref SecGrpDefaultAccess
+    Export:
+      Name: !Sub ${AWS::StackName}-DefaultAccess
+      
+  S3Endpoint:
+    Condition: CreateS3EndPoint
+    Value: !Ref S3Endpoint
+    Export:
+      Name: !Sub ${AWS::StackName}-S3Endpoint
+
+
