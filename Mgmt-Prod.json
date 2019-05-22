@@ -3,7 +3,7 @@
       "VpcSize":"M",
       "Token":"33645c78c199af1e39b4fb47fbcd16232b63833ec4d58764cfb02ee802b17ec2",
       "UseS3EndPoint":"yes",
-      "CustomerGatewayAddress":"145.234.241.70",
+      "CustomerGatewayAddress":"none",
       "CustomerGatewayId":"none",
       "DnsDomainName":"mediait.ch",
       "DnsServers":"10.64.64.10,10.64.96.10",
