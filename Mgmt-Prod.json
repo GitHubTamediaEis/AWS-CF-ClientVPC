@@ -12,7 +12,7 @@
       "PeerVpcPublicRouteTable":"",
       "Zone1":"eu-west-1a",
       "Zone2":"eu-west-1b",
-      "Zone3":"eu-west-1c",
+      "Zone3":"eu-west-1c"
    },
    "Tags":{  
       "Owner":"romain.schwery@tamedia.ch",
