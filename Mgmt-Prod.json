@@ -1,5 +1,7 @@
 {  
-   "Parameters":{  
+   "Parameters":{
+      "VpcSize":"M",
+      "Token":"b6b4932bcc2ec3200a640346decbd02b5009d7a26c15aea8eb0e2b67ce05d5b6",
       "UseS3EndPoint":"yes",
       "CustomerGatewayAddress":"145.234.241.70",
       "CustomerGatewayId":"none",
@@ -15,7 +17,7 @@
       "Zone3":"eu-west-1c"
    },
    "Tags":{  
-      "Owner":"romain.schwery@tamedia.ch",
+      "Owner":"pierre.steiner@tamedia.ch",
       "Landscape":"Prod",
       "CostCenter":"2489",
       "SupportedBy":"network@tamedia.ch"
