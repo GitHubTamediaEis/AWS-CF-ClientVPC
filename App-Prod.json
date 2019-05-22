@@ -10,16 +10,9 @@
       "PeerVpcCidr":"10.64.0.0/16",
       "PeerVpcPrivateRouteTable":"rtb-66209600",
       "PeerVpcPublicRouteTable":"rtb-bc3a8cda",
-      "VpcCidrBlock":"10.65.0.0/16",
       "Zone1":"eu-west-1a",
-      "Zone1CidrBlockPrivate":"10.65.64.0/19",
-      "Zone1CidrBlockPublic":"10.65.16.0/21",
       "Zone2":"eu-west-1b",
-      "Zone2CidrBlockPrivate":"10.65.96.0/19",
-      "Zone2CidrBlockPublic":"10.65.24.0/21",
-      "Zone3":"eu-west-1c",
-      "Zone3CidrBlockPrivate":"10.65.128.0/19",
-      "Zone3CidrBlockPublic":"10.65.32.0/21"
+      "Zone3":"eu-west-1c"
    },
    "Tags":{  
       "Owner":"romain.schwery@tamedia.ch",
