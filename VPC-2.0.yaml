@@ -16,7 +16,7 @@ Parameters:
      
   Token:
     Type: String
-    Description: "If you select a VPC size other than S, you need to request a token from Network Services first (network@tamedia.ch) providing the following details: Region, Account ID, Stack name, logical resource ID and the desired VPC size."
+    Description: "If you select a VPC size other than S, you need to request a token from Network Services first (network@tamedia.ch) providing the following details: Requirement for bigger VPC, the region to deploy in, your account ID and the desired VPC size."
      
   Zone1:
     Type: AWS::EC2::AvailabilityZone::Name
