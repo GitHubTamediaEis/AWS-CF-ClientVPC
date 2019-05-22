@@ -1,7 +1,7 @@
 {  
    "Parameters":{
       "VpcSize":"M",
-      "Token":"361f606c18df8405c531b9731e8723d410d823d2326e3b5b6d5bed419990f8bd",
+      "Token":"33645c78c199af1e39b4fb47fbcd16232b63833ec4d58764cfb02ee802b17ec2",
       "UseS3EndPoint":"yes",
       "CustomerGatewayAddress":"145.234.241.70",
       "CustomerGatewayId":"none",
