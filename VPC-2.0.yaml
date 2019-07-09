@@ -387,7 +387,7 @@ Resources:
   NatGatewayEip:
     Type: AWS::EC2::EIP
     Properties:
-      Domain: Vpc
+      Domain: vpc
 
   NatGateway:
     Type: AWS::EC2::NatGateway
