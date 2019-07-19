@@ -514,6 +514,7 @@ Resources:
   RoutePublicTGW1:
     Type: AWS::EC2::Route
     Condition: CreateTGWAttachement
+    DependsOn: AttachmentToTransitGateway
     Properties:
       RouteTableId: !Ref RouteTablePublic
       DestinationCidrBlock: 145.234.0.0/16
@@ -522,6 +523,7 @@ Resources:
   RoutePublicTGW2:
     Type: AWS::EC2::Route
     Condition: CreateTGWAttachement
+    DependsOn: AttachmentToTransitGateway
     Properties:
       RouteTableId: !Ref RouteTablePublic
       DestinationCidrBlock: 10.0.0.0/8
@@ -530,6 +532,7 @@ Resources:
   RoutePublicTGW3:
     Type: AWS::EC2::Route
     Condition: CreateTGWAttachement
+    DependsOn: AttachmentToTransitGateway
     Properties:
       RouteTableId: !Ref RouteTablePublic
       DestinationCidrBlock: 172.16.0.0/12
@@ -538,6 +541,7 @@ Resources:
   RoutePublicTGW4:
     Type: AWS::EC2::Route
     Condition: CreateTGWAttachement
+    DependsOn: AttachmentToTransitGateway
     Properties:
       RouteTableId: !Ref RouteTablePublic
       DestinationCidrBlock: 192.168.0.0/16
@@ -610,6 +614,7 @@ Resources:
   RoutePrivateTGW1:
     Type: AWS::EC2::Route
     Condition: CreateTGWAttachement
+    DependsOn: AttachmentToTransitGateway
     Properties:
       RouteTableId: !Ref RouteTablePrivate
       DestinationCidrBlock: 145.234.0.0/16
@@ -618,6 +623,7 @@ Resources:
   RoutePrivateTGW2:
     Type: AWS::EC2::Route
     Condition: CreateTGWAttachement
+    DependsOn: AttachmentToTransitGateway
     Properties:
       RouteTableId: !Ref RouteTablePrivate
       DestinationCidrBlock: 10.0.0.0/8
@@ -626,6 +632,7 @@ Resources:
   RoutePrivateTGW3:
     Type: AWS::EC2::Route
     Condition: CreateTGWAttachement
+    DependsOn: AttachmentToTransitGateway
     Properties:
       RouteTableId: !Ref RouteTablePrivate
       DestinationCidrBlock: 172.16.0.0/12
@@ -634,6 +641,7 @@ Resources:
   RoutePrivateTGW4:
     Type: AWS::EC2::Route
     Condition: CreateTGWAttachement
+    DependsOn: AttachmentToTransitGateway
     Properties:
       RouteTableId: !Ref RouteTablePrivate
       DestinationCidrBlock: 192.168.0.0/16
@@ -795,6 +803,7 @@ Resources:
   SecGrpDefaultAccess:
     Type: AWS::EC2::SecurityGroup
     Condition: CreateTGWAttachement
+    DependsOn: AttachmentToTransitGateway
     Properties:
       VpcId: !Ref Vpc
       GroupName: !Sub ${AWS::StackName}-DefaultAccess
