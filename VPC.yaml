@@ -319,11 +319,7 @@ Resources:
 # Attach VPC to the global tamedia corp transit gateway
 
   AttachToTransitGateway:
-    Type: AWS::EC2::VPCGatewayAttachment
     Condition: CreateTGWAttachement
-    Properties:
-      VpcId: !Ref Vpc
-      VpnGatewayId: !Ref VpnGateway
     Type: AWS::EC2::TransitGatewayAttachment
     Properties: 
       SubnetIds:
@@ -332,7 +328,7 @@ Resources:
         - !Ref Private3
       Tags:
         - Key: Name
-         Value: !Sub ${AWS::StackName}-AttachToTransitGateway
+          Value: !Sub ${AWS::StackName}-AttachToTransitGateway
       TransitGatewayId: !Ref TransitGatewayID
       VpcId: !Ref Vpc
 
@@ -515,68 +511,68 @@ Resources:
       DestinationCidrBlock: 0.0.0.0/0
       GatewayId: !Ref InternetGateway
 
-  VpnRoutePublic:
-    Type: AWS::EC2::Route
-    DependsOn: AttachVpnGateway
-    Condition: CreateVpn
-    Properties:
-      RouteTableId: !Ref RouteTablePublic
-      DestinationCidrBlock: 145.234.0.0/16
-      GatewayId: !Ref VpnGateway
+  # VpnRoutePublic:
+  #   Type: AWS::EC2::Route
+  #   DependsOn: AttachVpnGateway
+  #   Condition: CreateVpn
+  #   Properties:
+  #     RouteTableId: !Ref RouteTablePublic
+  #     DestinationCidrBlock: 145.234.0.0/16
+  #     GatewayId: !Ref VpnGateway
 
-  VpnRoutePublic2:
-    Type: AWS::EC2::Route
-    DependsOn: AttachVpnGateway
-    Condition: CreateVpn
-    Properties:
-      RouteTableId: !Ref RouteTablePublic
-      DestinationCidrBlock: 10.30.0.0/16
-      GatewayId: !Ref VpnGateway
+  # VpnRoutePublic2:
+  #   Type: AWS::EC2::Route
+  #   DependsOn: AttachVpnGateway
+  #   Condition: CreateVpn
+  #   Properties:
+  #     RouteTableId: !Ref RouteTablePublic
+  #     DestinationCidrBlock: 10.30.0.0/16
+  #     GatewayId: !Ref VpnGateway
 
-  VpnRoutePublic3:
-    Type: AWS::EC2::Route
-    DependsOn: AttachVpnGateway
-    Condition: CreateVpn
-    Properties:
-      RouteTableId: !Ref RouteTablePublic
-      DestinationCidrBlock: 10.24.0.0/16
-      GatewayId: !Ref VpnGateway         
+  # VpnRoutePublic3:
+  #   Type: AWS::EC2::Route
+  #   DependsOn: AttachVpnGateway
+  #   Condition: CreateVpn
+  #   Properties:
+  #     RouteTableId: !Ref RouteTablePublic
+  #     DestinationCidrBlock: 10.24.0.0/16
+  #     GatewayId: !Ref VpnGateway         
 
-  VpnRoutePublic4:
-    Type: AWS::EC2::Route
-    DependsOn: AttachVpnGateway
-    Condition: CreateVpn
-    Properties:
-      RouteTableId: !Ref RouteTablePublic
-      DestinationCidrBlock: 10.0.240.0/23
-      GatewayId: !Ref VpnGateway
+  # VpnRoutePublic4:
+  #   Type: AWS::EC2::Route
+  #   DependsOn: AttachVpnGateway
+  #   Condition: CreateVpn
+  #   Properties:
+  #     RouteTableId: !Ref RouteTablePublic
+  #     DestinationCidrBlock: 10.0.240.0/23
+  #     GatewayId: !Ref VpnGateway
 
-  VpnRoutePublic5:
-    Type: AWS::EC2::Route
-    DependsOn: AttachVpnGateway
-    Condition: CreateVpn
-    Properties:
-      RouteTableId: !Ref RouteTablePublic
-      DestinationCidrBlock: 10.0.249.0/24
-      GatewayId: !Ref VpnGateway
+  # VpnRoutePublic5:
+  #   Type: AWS::EC2::Route
+  #   DependsOn: AttachVpnGateway
+  #   Condition: CreateVpn
+  #   Properties:
+  #     RouteTableId: !Ref RouteTablePublic
+  #     DestinationCidrBlock: 10.0.249.0/24
+  #     GatewayId: !Ref VpnGateway
 
-  VpnRoutePublic6:
-    Type: AWS::EC2::Route
-    DependsOn: AttachVpnGateway
-    Condition: CreateVpn
-    Properties:
-      RouteTableId: !Ref RouteTablePublic
-      DestinationCidrBlock: 10.0.250.0/24
-      GatewayId: !Ref VpnGateway
+  # VpnRoutePublic6:
+  #   Type: AWS::EC2::Route
+  #   DependsOn: AttachVpnGateway
+  #   Condition: CreateVpn
+  #   Properties:
+  #     RouteTableId: !Ref RouteTablePublic
+  #     DestinationCidrBlock: 10.0.250.0/24
+  #     GatewayId: !Ref VpnGateway
 
-  VpnRoutePublic7:
-    Type: AWS::EC2::Route
-    DependsOn: AttachVpnGateway
-    Condition: CreateVpn
-    Properties:
-      RouteTableId: !Ref RouteTablePublic
-      DestinationCidrBlock: 10.100.4.0/22
-      GatewayId: !Ref VpnGateway
+  # VpnRoutePublic7:
+  #   Type: AWS::EC2::Route
+  #   DependsOn: AttachVpnGateway
+  #   Condition: CreateVpn
+  #   Properties:
+  #     RouteTableId: !Ref RouteTablePublic
+  #     DestinationCidrBlock: 10.100.4.0/22
+  #     GatewayId: !Ref VpnGateway
 
   DmzRoutePublic:
     Type: AWS::EC2::Route
@@ -607,77 +603,77 @@ Resources:
   #       - outputVpcCidrBlock
   #     VpcPeeringConnectionId: !Ref VpcPeering      
 
-  VpnRoutePrivate:
-    Type: AWS::EC2::Route
-    DependsOn: AttachVpnGateway
-    Condition: CreateVpn
-    Properties:
-      RouteTableId: !Ref RouteTablePrivate
-      DestinationCidrBlock: 145.234.0.0/16
-      GatewayId: !Ref VpnGateway
+  # VpnRoutePrivate:
+  #   Type: AWS::EC2::Route
+  #   DependsOn: AttachVpnGateway
+  #   Condition: CreateVpn
+  #   Properties:
+  #     RouteTableId: !Ref RouteTablePrivate
+  #     DestinationCidrBlock: 145.234.0.0/16
+  #     GatewayId: !Ref VpnGateway
 
-  VpnRoutePrivate2:
-    Type: AWS::EC2::Route
-    DependsOn: AttachVpnGateway
-    Condition: CreateVpn
-    Properties:
-      RouteTableId: !Ref RouteTablePrivate
-      DestinationCidrBlock: 10.30.0.0/16
-      GatewayId: !Ref VpnGateway      
+  # VpnRoutePrivate2:
+  #   Type: AWS::EC2::Route
+  #   DependsOn: AttachVpnGateway
+  #   Condition: CreateVpn
+  #   Properties:
+  #     RouteTableId: !Ref RouteTablePrivate
+  #     DestinationCidrBlock: 10.30.0.0/16
+  #     GatewayId: !Ref VpnGateway      
 
-  VpnRoutePrivate3:
-    Type: AWS::EC2::Route
-    DependsOn: AttachVpnGateway
-    Condition: CreateVpn
-    Properties:
-      RouteTableId: !Ref RouteTablePrivate
-      DestinationCidrBlock: 10.24.0.0/16
-      GatewayId: !Ref VpnGateway         
+  # VpnRoutePrivate3:
+  #   Type: AWS::EC2::Route
+  #   DependsOn: AttachVpnGateway
+  #   Condition: CreateVpn
+  #   Properties:
+  #     RouteTableId: !Ref RouteTablePrivate
+  #     DestinationCidrBlock: 10.24.0.0/16
+  #     GatewayId: !Ref VpnGateway         
 
-  VpnRoutePrivate4:
-    Type: AWS::EC2::Route
-    DependsOn: AttachVpnGateway
-    Condition: CreateVpn
-    Properties:
-      RouteTableId: !Ref RouteTablePrivate
-      DestinationCidrBlock: 10.0.240.0/23
-      GatewayId: !Ref VpnGateway
+  # VpnRoutePrivate4:
+  #   Type: AWS::EC2::Route
+  #   DependsOn: AttachVpnGateway
+  #   Condition: CreateVpn
+  #   Properties:
+  #     RouteTableId: !Ref RouteTablePrivate
+  #     DestinationCidrBlock: 10.0.240.0/23
+  #     GatewayId: !Ref VpnGateway
 
-  VpnRoutePrivate5:
-    Type: AWS::EC2::Route
-    DependsOn: AttachVpnGateway
-    Condition: CreateVpn
-    Properties:
-      RouteTableId: !Ref RouteTablePrivate
-      DestinationCidrBlock: 10.0.249.0/24
-      GatewayId: !Ref VpnGateway
+  # VpnRoutePrivate5:
+  #   Type: AWS::EC2::Route
+  #   DependsOn: AttachVpnGateway
+  #   Condition: CreateVpn
+  #   Properties:
+  #     RouteTableId: !Ref RouteTablePrivate
+  #     DestinationCidrBlock: 10.0.249.0/24
+  #     GatewayId: !Ref VpnGateway
 
-  VpnRoutePrivate6:
-    Type: AWS::EC2::Route
-    DependsOn: AttachVpnGateway
-    Condition: CreateVpn
-    Properties:
-      RouteTableId: !Ref RouteTablePrivate
-      DestinationCidrBlock: 10.0.250.0/24
-      GatewayId: !Ref VpnGateway
+  # VpnRoutePrivate6:
+  #   Type: AWS::EC2::Route
+  #   DependsOn: AttachVpnGateway
+  #   Condition: CreateVpn
+  #   Properties:
+  #     RouteTableId: !Ref RouteTablePrivate
+  #     DestinationCidrBlock: 10.0.250.0/24
+  #     GatewayId: !Ref VpnGateway
 
-  VpnRoutePrivate7:
-    Type: AWS::EC2::Route
-    DependsOn: AttachVpnGateway
-    Condition: CreateVpn
-    Properties:
-      RouteTableId: !Ref RouteTablePrivate
-      DestinationCidrBlock: 10.100.4.0/22
-      GatewayId: !Ref VpnGateway
+  # VpnRoutePrivate7:
+  #   Type: AWS::EC2::Route
+  #   DependsOn: AttachVpnGateway
+  #   Condition: CreateVpn
+  #   Properties:
+  #     RouteTableId: !Ref RouteTablePrivate
+  #     DestinationCidrBlock: 10.100.4.0/22
+  #     GatewayId: !Ref VpnGateway
 
-  DmzRoutePrivate1: # Exception for RAS-TAM DMZ to be routed via VPN
-    Type: AWS::EC2::Route
-    DependsOn: AttachVpnGateway
-    Condition: CreateVpn
-    Properties:
-      RouteTableId: !Ref RouteTablePrivate
-      DestinationCidrBlock: 145.234.241.0/27
-      GatewayId: !Ref VpnGateway
+  # DmzRoutePrivate1: # Exception for RAS-TAM DMZ to be routed via VPN
+  #   Type: AWS::EC2::Route
+  #   DependsOn: AttachVpnGateway
+  #   Condition: CreateVpn
+  #   Properties:
+  #     RouteTableId: !Ref RouteTablePrivate
+  #     DestinationCidrBlock: 145.234.241.0/27
+  #     GatewayId: !Ref VpnGateway
 
   DmzRoutePrivate:
     Type: AWS::EC2::Route
@@ -743,7 +739,7 @@ Resources:
 
   SecGrpDefaultAccess:
     Type: AWS::EC2::SecurityGroup
-    Condition: CreateVpn
+    Condition: CreateTGWAttachement
     Properties:
       VpcId: !Ref Vpc
       GroupName: !Sub ${AWS::StackName}-DefaultAccess
@@ -932,32 +928,32 @@ Outputs:
     Export:
       Name: !Sub ${AWS::StackName}-InternetGateway
 
-  VpnGateway:
-    Condition: CreateVpn
-    Value: !Ref VpnGateway
-    Export:
-      Name: !Sub ${AWS::StackName}-VpnGateway
+  # VpnGateway:
+  #   Condition: CreateVpn
+  #   Value: !Ref VpnGateway
+  #   Export:
+  #     Name: !Sub ${AWS::StackName}-VpnGateway
 
-  DhcpOptions:
-    Condition: DefineCustomDNSParameters
-    Value: !Ref DhcpOptions
-    Export:
-      Name: !Sub ${AWS::StackName}-DhcpOptions
+  # DhcpOptions:
+  #   Condition: DefineCustomDNSParameters
+  #   Value: !Ref DhcpOptions
+  #   Export:
+  #     Name: !Sub ${AWS::StackName}-DhcpOptions
 
-  VpcPeering:
-    Condition: CreateVpcPeering
-    Value: !Ref VpcPeering
-    Export:
-      Name: !Sub ${AWS::StackName}-MgmtVpcPeering
+  # VpcPeering:
+  #   Condition: CreateVpcPeering
+  #   Value: !Ref VpcPeering
+  #   Export:
+  #     Name: !Sub ${AWS::StackName}-MgmtVpcPeering
 
   SecGrpDefaultAccess:
-    Condition: CreateVpn
+    Condition: CreateTGWAttachement
     Value: !Ref SecGrpDefaultAccess
     Export:
       Name: !Sub ${AWS::StackName}-DefaultAccess
       
-  S3Endpoint:
-    Condition: CreateS3EndPoint
-    Value: !Ref S3Endpoint
-    Export:
-      Name: !Sub ${AWS::StackName}-S3Endpoint
+  # S3Endpoint:
+  #   Condition: CreateS3EndPoint
+  #   Value: !Ref S3Endpoint
+  #   Export:
+  #     Name: !Sub ${AWS::StackName}-S3Endpoint
