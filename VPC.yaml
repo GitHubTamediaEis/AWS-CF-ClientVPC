@@ -318,7 +318,7 @@ Resources:
   
 # Attach VPC to the global tamedia corp transit gateway
 
-  AttachToTransitGateway:
+  AttachmentToTransitGateway:
     Condition: CreateTGWAttachement
     Type: AWS::EC2::TransitGatewayAttachment
     Properties: 
@@ -511,14 +511,37 @@ Resources:
       DestinationCidrBlock: 0.0.0.0/0
       GatewayId: !Ref InternetGateway
 
-  # VpnRoutePublic:
-  #   Type: AWS::EC2::Route
-  #   DependsOn: AttachVpnGateway
-  #   Condition: CreateVpn
-  #   Properties:
-  #     RouteTableId: !Ref RouteTablePublic
-  #     DestinationCidrBlock: 145.234.0.0/16
-  #     GatewayId: !Ref VpnGateway
+  RoutePublicTGW1:
+    Type: AWS::EC2::Route
+    Condition: CreateTGWAttachement
+    Properties:
+      RouteTableId: !Ref RouteTablePublic
+      DestinationCidrBlock: 145.234.0.0/16
+      GatewayId: !Ref AttachmentToTransitGateway
+
+  RoutePublicTGW2:
+    Type: AWS::EC2::Route
+    Condition: CreateTGWAttachement
+    Properties:
+      RouteTableId: !Ref RouteTablePublic
+      DestinationCidrBlock: 10.0.0.0/8
+      GatewayId: !Ref AttachmentToTransitGateway
+
+  RoutePublicTGW3:
+    Type: AWS::EC2::Route
+    Condition: CreateTGWAttachement
+    Properties:
+      RouteTableId: !Ref RouteTablePublic
+      DestinationCidrBlock: 172.16.0.0/12
+      GatewayId: !Ref AttachmentToTransitGateway
+
+  RoutePublicTGW4:
+    Type: AWS::EC2::Route
+    Condition: CreateTGWAttachement
+    Properties:
+      RouteTableId: !Ref RouteTablePublic
+      DestinationCidrBlock: 192.168.0.0/16
+      GatewayId: !Ref AttachmentToTransitGateway
 
   # VpnRoutePublic2:
   #   Type: AWS::EC2::Route
@@ -584,6 +607,38 @@ Resources:
 
 # Add routes for private subnets
 
+  RoutePrivateTGW1:
+    Type: AWS::EC2::Route
+    Condition: CreateTGWAttachement
+    Properties:
+      RouteTableId: !Ref RouteTablePrivate
+      DestinationCidrBlock: 145.234.0.0/16
+      GatewayId: !Ref AttachmentToTransitGateway
+
+  RoutePrivateTGW2:
+    Type: AWS::EC2::Route
+    Condition: CreateTGWAttachement
+    Properties:
+      RouteTableId: !Ref RouteTablePrivate
+      DestinationCidrBlock: 10.0.0.0/8
+      GatewayId: !Ref AttachmentToTransitGateway
+
+  RoutePrivateTGW3:
+    Type: AWS::EC2::Route
+    Condition: CreateTGWAttachement
+    Properties:
+      RouteTableId: !Ref RouteTablePrivate
+      DestinationCidrBlock: 172.16.0.0/12
+      GatewayId: !Ref AttachmentToTransitGateway
+
+  RoutePrivateTGW4:
+    Type: AWS::EC2::Route
+    Condition: CreateTGWAttachement
+    Properties:
+      RouteTableId: !Ref RouteTablePrivate
+      DestinationCidrBlock: 192.168.0.0/16
+      GatewayId: !Ref AttachmentToTransitGateway
+      
   # PeeringRoutePrivate:
   #   Type: AWS::EC2::Route
   #   Condition: CreateVpcPeering
