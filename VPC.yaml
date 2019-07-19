@@ -511,37 +511,37 @@ Resources:
       DestinationCidrBlock: 0.0.0.0/0
       GatewayId: !Ref InternetGateway
 
-  RoutePublicTGW1:
-    Type: AWS::EC2::Route
-    Condition: CreateTGWAttachement
-    Properties:
-      RouteTableId: !Ref RouteTablePublic
-      DestinationCidrBlock: 145.234.0.0/16
-      TransitGatewayId: !Ref TransitGatewayID
+  # RoutePublicTGW1:
+  #   Type: AWS::EC2::Route
+  #   Condition: CreateTGWAttachement
+  #   Properties:
+  #     RouteTableId: !Ref RouteTablePublic
+  #     DestinationCidrBlock: 145.234.0.0/16
+  #     TransitGatewayId: !Ref TransitGatewayID
 
-  RoutePublicTGW2:
-    Type: AWS::EC2::Route
-    Condition: CreateTGWAttachement
-    Properties:
-      RouteTableId: !Ref RouteTablePublic
-      DestinationCidrBlock: 10.0.0.0/8
-      TransitGatewayId: !Ref TransitGatewayID
+  # RoutePublicTGW2:
+  #   Type: AWS::EC2::Route
+  #   Condition: CreateTGWAttachement
+  #   Properties:
+  #     RouteTableId: !Ref RouteTablePublic
+  #     DestinationCidrBlock: 10.0.0.0/8
+  #     TransitGatewayId: !Ref TransitGatewayID
 
-  RoutePublicTGW3:
-    Type: AWS::EC2::Route
-    Condition: CreateTGWAttachement
-    Properties:
-      RouteTableId: !Ref RouteTablePublic
-      DestinationCidrBlock: 172.16.0.0/12
-      TransitGatewayId: !Ref TransitGatewayID
+  # RoutePublicTGW3:
+  #   Type: AWS::EC2::Route
+  #   Condition: CreateTGWAttachement
+  #   Properties:
+  #     RouteTableId: !Ref RouteTablePublic
+  #     DestinationCidrBlock: 172.16.0.0/12
+  #     TransitGatewayId: !Ref TransitGatewayID
 
-  RoutePublicTGW4:
-    Type: AWS::EC2::Route
-    Condition: CreateTGWAttachement
-    Properties:
-      RouteTableId: !Ref RouteTablePublic
-      DestinationCidrBlock: 192.168.0.0/16
-      TransitGatewayId: !Ref TransitGatewayID
+  # RoutePublicTGW4:
+  #   Type: AWS::EC2::Route
+  #   Condition: CreateTGWAttachement
+  #   Properties:
+  #     RouteTableId: !Ref RouteTablePublic
+  #     DestinationCidrBlock: 192.168.0.0/16
+  #     TransitGatewayId: !Ref TransitGatewayID
 
   # VpnRoutePublic2:
   #   Type: AWS::EC2::Route
@@ -607,37 +607,37 @@ Resources:
 
 # Add routes for private subnets
 
-  RoutePrivateTGW1:
-    Type: AWS::EC2::Route
-    Condition: CreateTGWAttachement
-    Properties:
-      RouteTableId: !Ref RouteTablePrivate
-      DestinationCidrBlock: 145.234.0.0/16
-      TransitGatewayId: !Ref TransitGatewayID
+  # RoutePrivateTGW1:
+  #   Type: AWS::EC2::Route
+  #   Condition: CreateTGWAttachement
+  #   Properties:
+  #     RouteTableId: !Ref RouteTablePrivate
+  #     DestinationCidrBlock: 145.234.0.0/16
+  #     TransitGatewayId: !Ref TransitGatewayID
 
-  RoutePrivateTGW2:
-    Type: AWS::EC2::Route
-    Condition: CreateTGWAttachement
-    Properties:
-      RouteTableId: !Ref RouteTablePrivate
-      DestinationCidrBlock: 10.0.0.0/8
-      TransitGatewayId: !Ref TransitGatewayID
+  # RoutePrivateTGW2:
+  #   Type: AWS::EC2::Route
+  #   Condition: CreateTGWAttachement
+  #   Properties:
+  #     RouteTableId: !Ref RouteTablePrivate
+  #     DestinationCidrBlock: 10.0.0.0/8
+  #     TransitGatewayId: !Ref TransitGatewayID
 
-  RoutePrivateTGW3:
-    Type: AWS::EC2::Route
-    Condition: CreateTGWAttachement
-    Properties:
-      RouteTableId: !Ref RouteTablePrivate
-      DestinationCidrBlock: 172.16.0.0/12
-      TransitGatewayId: !Ref TransitGatewayID
+  # RoutePrivateTGW3:
+  #   Type: AWS::EC2::Route
+  #   Condition: CreateTGWAttachement
+  #   Properties:
+  #     RouteTableId: !Ref RouteTablePrivate
+  #     DestinationCidrBlock: 172.16.0.0/12
+  #     TransitGatewayId: !Ref TransitGatewayID
 
-  RoutePrivateTGW4:
-    Type: AWS::EC2::Route
-    Condition: CreateTGWAttachement
-    Properties:
-      RouteTableId: !Ref RouteTablePrivate
-      DestinationCidrBlock: 192.168.0.0/16
-      TransitGatewayId: !Ref TransitGatewayID
+  # RoutePrivateTGW4:
+  #   Type: AWS::EC2::Route
+  #   Condition: CreateTGWAttachement
+  #   Properties:
+  #     RouteTableId: !Ref RouteTablePrivate
+  #     DestinationCidrBlock: 192.168.0.0/16
+  #     TransitGatewayId: !Ref TransitGatewayID
       
   # PeeringRoutePrivate:
   #   Type: AWS::EC2::Route
