@@ -299,6 +299,51 @@ Resources:
         - Key: Name
           Value: !Sub ${AWS::StackName}-Private3
 
+# Setup the primary private subnet
+
+  IntraVPC1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Ref Zone1
+      VpcId: !Ref Vpc
+      CidrBlock:
+        Fn::GetAtt: 
+        - VpcAddressCustomResource
+        - outputAz1Unrouted
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName}-IntraVPC1
+
+# Setup the secondary private subnet
+
+  IntraVPC2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Ref Zone2
+      VpcId: !Ref Vpc
+      CidrBlock:
+        Fn::GetAtt: 
+        - VpcAddressCustomResource
+        - outputAz2Unrouted
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName}-IntraVPC2
+
+# Setup the third private subnet
+
+  IntraVPC3:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Ref Zone3
+      VpcId: !Ref Vpc
+      CidrBlock:
+        Fn::GetAtt: 
+        - VpcAddressCustomResource
+        - outputAz3Unrouted
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName}-IntraVPC3
+
 # Setup the internet gateway
 
   InternetGateway:
@@ -481,6 +526,16 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub ${AWS::StackName}-Private
+
+# Setup the primary intra VPC route table
+
+  RouteTableIntraVPC:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref Vpc
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName}-IntraVPC
 
 # Add routes for public subnets
 
@@ -744,6 +799,14 @@ Resources:
       RouteTableId: !Ref RouteTablePrivate
       DestinationCidrBlock: 145.234.240.0/22
       NatGatewayId: !Ref NatGateway
+
+  InternetRouteIntraVPC:
+    Type: AWS::EC2::Route
+    DependsOn: AttachGateway
+    Properties:
+      RouteTableId: !Ref RouteTableIntraVPC
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref NatGateway
 
   NatRoutePrivate:
     Type: AWS::EC2::Route
