@@ -1,5 +1,5 @@
----
 AWSTemplateFormatVersion: 2010-09-09
+#TODO: Update desc
 Description: Setup a VPC with private and public subnets in three AZs. Includes one NAT- and one Internet-Gateway. Optional IPsec VPN and peering with a Mgmt-VPC.
 
 Parameters:
@@ -29,7 +29,7 @@ Parameters:
 
   TransitGatewayID:
     Type: String
-    Default: "none"
+    Default: "none" #TODO: "" instead of none
     Description: "ID of the Tamedia corporate transit gateway if access to the shared services is required"
 
   Zone1:
@@ -506,7 +506,7 @@ Resources:
   #       - VpcAddressCustomResource
   #       - outputVpcCidrBlock
   #     VpcPeeringConnectionId: !Ref VpcPeering
-
+#TODO: Review those routes. How about sending class A,B,C + 145.234 to the TGW
   InternetRoutePublic:
     Type: AWS::EC2::Route
     DependsOn: AttachGateway
@@ -741,52 +741,52 @@ Resources:
       SubnetId: !Ref Private3
       RouteTableId: !Ref RouteTablePrivate
 
-  SecGrpDefaultAccess:
-    Type: AWS::EC2::SecurityGroup
-    Condition: CreateVpn
-    Properties:
-      VpcId: !Ref Vpc
-      GroupName: !Sub ${AWS::StackName}-DefaultAccess
-      GroupDescription: Default access rules for Mgmt, Monitoring, AntiVirus and the like.
-      SecurityGroupIngress:
-        #SSH Management from 145.234.0.0/16
-        - IpProtocol: tcp
-          CidrIp: 145.234.0.0/16
-          FromPort: 22
-          ToPort: 22
-        #RDP Management from 145.234.0.0/16
-        - IpProtocol: tcp
-          CidrIp: 145.234.0.0/16
-          FromPort: 3389
-          ToPort: 3389
-        #TrendMicro from s7380
-        - IpProtocol: tcp
-          CidrIp: 145.234.72.123/32
-          FromPort: 4118
-          ToPort: 4118
-        #TrendMicro from s7387
-        - IpProtocol: tcp
-          CidrIp: 145.234.72.117/32
-          FromPort: 4118
-          ToPort: 4118
-        #SNMP from s6612 (cMK Bern active)
-        - IpProtocol: udp
-          CidrIp: 145.234.70.181/32
-          FromPort: 161
-          ToPort: 161
-        #SNMP from s6613 (cMK Bern passive)
-        - IpProtocol: udp
-          CidrIp: 145.234.70.182/32
-          FromPort: 161
-          ToPort: 161
-        #ICMP (Ping) from 145.234.0.0/16
-        - IpProtocol: icmp
-          CidrIp: 145.234.0.0/16
-          FromPort: -1
-          ToPort: -1
-      Tags:
-        - Key: Name
-          Value: !Sub ${AWS::StackName}-DefaultAccess
+  # SecGrpDefaultAccess: #TODO: Remove
+  #   Type: AWS::EC2::SecurityGroup
+  #   Condition: CreateVpn
+  #   Properties:
+  #     VpcId: !Ref Vpc
+  #     GroupName: !Sub ${AWS::StackName}-DefaultAccess
+  #     GroupDescription: Default access rules for Mgmt, Monitoring, AntiVirus and the like.
+  #     SecurityGroupIngress:
+  #       #SSH Management from 145.234.0.0/16
+  #       - IpProtocol: tcp
+  #         CidrIp: 145.234.0.0/16
+  #         FromPort: 22
+  #         ToPort: 22
+  #       #RDP Management from 145.234.0.0/16
+  #       - IpProtocol: tcp
+  #         CidrIp: 145.234.0.0/16
+  #         FromPort: 3389
+  #         ToPort: 3389
+  #       #TrendMicro from s7380
+  #       - IpProtocol: tcp
+  #         CidrIp: 145.234.72.123/32
+  #         FromPort: 4118
+  #         ToPort: 4118
+  #       #TrendMicro from s7387
+  #       - IpProtocol: tcp
+  #         CidrIp: 145.234.72.117/32
+  #         FromPort: 4118
+  #         ToPort: 4118
+  #       #SNMP from s6612 (cMK Bern active)
+  #       - IpProtocol: udp
+  #         CidrIp: 145.234.70.181/32
+  #         FromPort: 161
+  #         ToPort: 161
+  #       #SNMP from s6613 (cMK Bern passive)
+  #       - IpProtocol: udp
+  #         CidrIp: 145.234.70.182/32
+  #         FromPort: 161
+  #         ToPort: 161
+  #       #ICMP (Ping) from 145.234.0.0/16
+  #       - IpProtocol: icmp
+  #         CidrIp: 145.234.0.0/16
+  #         FromPort: -1
+  #         ToPort: -1
+  #     Tags:
+  #       - Key: Name
+  #         Value: !Sub ${AWS::StackName}-DefaultAccess
           
 # Setup S3 VPC Endpoint if required
                   
@@ -800,7 +800,7 @@ Resources:
   #     VpcId: !Ref Vpc
 
 Outputs:
-
+#TODO: export subnets, but without the stackname so that they are guessable by the client
   Vpc:
     Value: !Ref Vpc
     Export:
@@ -888,9 +888,7 @@ Outputs:
       
   Private2CidrBlock:
     Value:
-        Fn::GetAtt: 
-        - VpcAddressCustomResource
-        - outputAz2Private
+        !GetAtt VpcAddressCustomResource.outputAz2Private #TODO Harmonize syntax to that
     Export:
       Name: !Sub ${AWS::StackName}-Private2-CidrBlock
       
@@ -927,37 +925,37 @@ Outputs:
     Export:
       Name: !Sub ${AWS::StackName}-NatGatewayEip
 
-  InternetGateway:
-    Value: !Ref InternetGateway
-    Export:
-      Name: !Sub ${AWS::StackName}-InternetGateway
+  # InternetGateway:
+  #   Value: !Ref InternetGateway
+  #   Export:
+  #     Name: !Sub ${AWS::StackName}-InternetGateway
 
-  VpnGateway:
-    Condition: CreateVpn
-    Value: !Ref VpnGateway
-    Export:
-      Name: !Sub ${AWS::StackName}-VpnGateway
+  # VpnGateway:
+  #   Condition: CreateVpn
+  #   Value: !Ref VpnGateway
+  #   Export:
+  #     Name: !Sub ${AWS::StackName}-VpnGateway
 
-  DhcpOptions:
-    Condition: DefineCustomDNSParameters
-    Value: !Ref DhcpOptions
-    Export:
-      Name: !Sub ${AWS::StackName}-DhcpOptions
+  # DhcpOptions:
+  #   Condition: DefineCustomDNSParameters
+  #   Value: !Ref DhcpOptions
+  #   Export:
+  #     Name: !Sub ${AWS::StackName}-DhcpOptions
 
-  VpcPeering:
-    Condition: CreateVpcPeering
-    Value: !Ref VpcPeering
-    Export:
-      Name: !Sub ${AWS::StackName}-MgmtVpcPeering
+  # VpcPeering:
+  #   Condition: CreateVpcPeering
+  #   Value: !Ref VpcPeering
+  #   Export:
+  #     Name: !Sub ${AWS::StackName}-MgmtVpcPeering
 
-  SecGrpDefaultAccess:
-    Condition: CreateVpn
-    Value: !Ref SecGrpDefaultAccess
-    Export:
-      Name: !Sub ${AWS::StackName}-DefaultAccess
+  # SecGrpDefaultAccess:
+  #   Condition: CreateVpn
+  #   Value: !Ref SecGrpDefaultAccess
+  #   Export:
+  #     Name: !Sub ${AWS::StackName}-DefaultAccess
       
-  S3Endpoint:
-    Condition: CreateS3EndPoint
-    Value: !Ref S3Endpoint
-    Export:
-      Name: !Sub ${AWS::StackName}-S3Endpoint
+  # S3Endpoint:
+  #   Condition: CreateS3EndPoint
+  #   Value: !Ref S3Endpoint
+  #   Export:
+  #     Name: !Sub ${AWS::StackName}-S3Endpoint
