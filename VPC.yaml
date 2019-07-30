@@ -190,7 +190,7 @@ Resources:
   VpcAddressCustomResource:
     Type: Custom::VpcAddress
     Properties: 
-      ServiceToken: arn:aws:sns:eu-west-1:331393623535:AWS-CF-VPCAddressCustomResource-SnsTopic
+      ServiceToken: arn:aws:sns:eu-west-1:733626620836:VPCAddressCustomResource-Prod-SnsTopic
       VpcSize: !Ref VpcSize
       Token: !Ref Token
 
