@@ -1,6 +1,5 @@
----
 AWSTemplateFormatVersion: 2010-09-09
-Description: Setup a VPC with private and public subnets in three AZs. Includes one NAT- and one Internet-Gateway. Optional IPsec VPN and peering with a Mgmt-VPC.
+Description: Setup a VPC with private, public and intraVPC subnets in three AZs. Includes one NAT- and one Internet-Gateway. Optional Transit Gateway attachement and custom features.
 
 Parameters:
 
@@ -29,7 +28,7 @@ Parameters:
 
   TransitGatewayID:
     Type: String
-    Default: "none"
+    Default: ""
     Description: "ID of the Tamedia corporate transit gateway if access to the shared services is required"
 
   Zone1:
@@ -180,7 +179,7 @@ Conditions:
   # CreateVpn: !Or [!Not [!Equals [ !Ref CustomerGatewayId, none ]], !Not [!Equals [ !Ref CustomerGatewayAddress, none ]]]
   # CreateCustomerGateway: !Not [!Equals [ !Ref CustomerGatewayAddress, none ]]
   # CreateS3EndPoint: !Equals [ !Ref UseS3EndPoint, "yes" ]
-  CreateTGWAttachement: !And [ !Equals [ !Ref AccessToCorpSharedServices, "yes" ] , !Not [ !Equals [ !Ref TransitGatewayID, none ] ] ]
+  CreateTGWAttachement: !And [ !Equals [ !Ref AccessToCorpSharedServices, "yes" ] , !Not [ !Equals [ !Ref TransitGatewayID, "" ] ] ]
   # DefineCustomDNSParameters: !Equals [ !Ref UseCustomizedDNSParameters, "yes" ]
 
 Resources:
@@ -202,147 +201,127 @@ Resources:
       EnableDnsSupport: true
       EnableDnsHostnames: true
       CidrBlock:
-        Fn::GetAtt: 
-        - VpcAddressCustomResource
-        - outputVpcCidrBlock
+        !GetAtt VpcAddressCustomResource.outputVpcCidrBlock
       Tags:
       - Key: Name
         Value: !Sub ${AWS::StackName}
 
 # Setup the primary public subnet
 
-  Public1:
+  PublicSubnet1:
     Type: AWS::EC2::Subnet
     Properties:
       AvailabilityZone: !Ref Zone1
       VpcId: !Ref Vpc
       CidrBlock:
-        Fn::GetAtt: 
-        - VpcAddressCustomResource
-        - outputAz1Public
+        !GetAtt VpcAddressCustomResource.outputAz1Public
       Tags:
         - Key: Name
-          Value: !Sub ${AWS::StackName}-Public1
+          Value: !Sub ${AWS::StackName}-PublicSubnet1
 
 # Setup the secondary public subnet
 
-  Public2:
+  PublicSubnet2:
     Type: AWS::EC2::Subnet
     Properties:
       AvailabilityZone: !Ref Zone2
       VpcId: !Ref Vpc
       CidrBlock:
-        Fn::GetAtt: 
-        - VpcAddressCustomResource
-        - outputAz2Public
+        !GetAtt VpcAddressCustomResource.outputAz2Public
       Tags:
         - Key: Name
-          Value: !Sub ${AWS::StackName}-Public2
+          Value: !Sub ${AWS::StackName}-PublicSubnet2
 
 # Setup the third public subnet
 
-  Public3:
+  PublicSubnet3:
     Type: AWS::EC2::Subnet
     Properties:
       AvailabilityZone: !Ref Zone3
       VpcId: !Ref Vpc
       CidrBlock:
-        Fn::GetAtt: 
-        - VpcAddressCustomResource
-        - outputAz3Public
+        !GetAtt VpcAddressCustomResource.outputAz3Public
       Tags:
         - Key: Name
-          Value: !Sub ${AWS::StackName}-Public3
+          Value: !Sub ${AWS::StackName}-PublicSubnet3
 
 # Setup the primary private subnet
 
-  Private1:
+  PrivateSubnet1:
     Type: AWS::EC2::Subnet
     Properties:
       AvailabilityZone: !Ref Zone1
       VpcId: !Ref Vpc
       CidrBlock:
-        Fn::GetAtt: 
-        - VpcAddressCustomResource
-        - outputAz1Private
+        !GetAtt VpcAddressCustomResource.outputAz1Private
       Tags:
         - Key: Name
-          Value: !Sub ${AWS::StackName}-Private1
+          Value: !Sub ${AWS::StackName}-PrivateSubnet1
 
 # Setup the secondary private subnet
 
-  Private2:
+  PrivateSubnet2:
     Type: AWS::EC2::Subnet
     Properties:
       AvailabilityZone: !Ref Zone2
       VpcId: !Ref Vpc
       CidrBlock:
-        Fn::GetAtt: 
-        - VpcAddressCustomResource
-        - outputAz2Private
+        !GetAtt VpcAddressCustomResource.outputAz2Private
       Tags:
         - Key: Name
-          Value: !Sub ${AWS::StackName}-Private2
+          Value: !Sub ${AWS::StackName}-PrivateSubnet2
 
 # Setup the third private subnet
 
-  Private3:
+  PrivateSubnet3:
     Type: AWS::EC2::Subnet
     Properties:
       AvailabilityZone: !Ref Zone3
       VpcId: !Ref Vpc
       CidrBlock:
-        Fn::GetAtt: 
-        - VpcAddressCustomResource
-        - outputAz3Private
+        !GetAtt VpcAddressCustomResource.outputAz3Private
       Tags:
         - Key: Name
-          Value: !Sub ${AWS::StackName}-Private3
+          Value: !Sub ${AWS::StackName}-PrivateSubnet3
 
 # Setup the primary private subnet
 
-  IntraVPC1:
+  IntraVPCSubnet1:
     Type: AWS::EC2::Subnet
     Properties:
       AvailabilityZone: !Ref Zone1
       VpcId: !Ref Vpc
       CidrBlock:
-        Fn::GetAtt: 
-        - VpcAddressCustomResource
-        - outputAz1Unrouted
+        !GetAtt VpcAddressCustomResource.outputAz1IntraVPC
       Tags:
         - Key: Name
-          Value: !Sub ${AWS::StackName}-IntraVPC1
+          Value: !Sub ${AWS::StackName}-IntraVPCSubnet1
 
 # Setup the secondary private subnet
 
-  IntraVPC2:
+  IntraVPCSubnet2:
     Type: AWS::EC2::Subnet
     Properties:
       AvailabilityZone: !Ref Zone2
       VpcId: !Ref Vpc
       CidrBlock:
-        Fn::GetAtt: 
-        - VpcAddressCustomResource
-        - outputAz2Unrouted
+        !GetAtt VpcAddressCustomResource.outputAz2IntraVPC
       Tags:
         - Key: Name
-          Value: !Sub ${AWS::StackName}-IntraVPC2
+          Value: !Sub ${AWS::StackName}-IntraVPCSubnet2
 
 # Setup the third private subnet
 
-  IntraVPC3:
+  IntraVPCSubnet3:
     Type: AWS::EC2::Subnet
     Properties:
       AvailabilityZone: !Ref Zone3
       VpcId: !Ref Vpc
       CidrBlock:
-        Fn::GetAtt: 
-        - VpcAddressCustomResource
-        - outputAz3Unrouted
+        !GetAtt VpcAddressCustomResource.outputAz3IntraVPC
       Tags:
         - Key: Name
-          Value: !Sub ${AWS::StackName}-IntraVPC3
+          Value: !Sub ${AWS::StackName}-IntraVPCSubnet3
 
 # Setup the internet gateway
 
@@ -368,9 +347,9 @@ Resources:
     Type: AWS::EC2::TransitGatewayAttachment
     Properties: 
       SubnetIds:
-        - !Ref Private1
-        - !Ref Private2
-        - !Ref Private3
+        - !Ref PrivateSubnet1
+        - !Ref PrivateSubnet2
+        - !Ref PrivateSubnet3
       Tags:
         - Key: Name
           Value: !Sub ${AWS::StackName}-AttachToTransitGateway
@@ -474,7 +453,7 @@ Resources:
     Type: AWS::EC2::NatGateway
     Properties:
       AllocationId: !GetAtt NatGatewayEip.AllocationId
-      SubnetId: !Ref Public1
+      SubnetId: !Ref PublicSubnet1
       Tags:
         - Key: Name
           Value: !Sub ${AWS::StackName}-NatGateway
@@ -553,9 +532,7 @@ Resources:
   #   Properties:
   #     RouteTableId: !Ref PeerVpcPublicRouteTable
   #     DestinationCidrBlock:
-  #       Fn::GetAtt: 
-  #       - VpcAddressCustomResource
-  #       - outputVpcCidrBlock
+  #       !GetAtt VpcAddressCustomResource.outputVpcCidrBlock
   #     VpcPeeringConnectionId: !Ref VpcPeering
 
   InternetRoutePublic:
@@ -602,7 +579,7 @@ Resources:
       DestinationCidrBlock: 192.168.0.0/16
       TransitGatewayId: !Ref TransitGatewayID
 
-  # VpnRoutePublic2:
+  # VpnRoutePublicSubnet2:
   #   Type: AWS::EC2::Route
   #   DependsOn: AttachVpnGateway
   #   Condition: CreateVpn
@@ -611,7 +588,7 @@ Resources:
   #     DestinationCidrBlock: 10.30.0.0/16
   #     GatewayId: !Ref VpnGateway
 
-  # VpnRoutePublic3:
+  # VpnRoutePublicSubnet3:
   #   Type: AWS::EC2::Route
   #   DependsOn: AttachVpnGateway
   #   Condition: CreateVpn
@@ -716,9 +693,7 @@ Resources:
   #   Properties:
   #     RouteTableId: !Ref PeerVpcPrivateRouteTable
   #     DestinationCidrBlock:
-  #       Fn::GetAtt: 
-  #       - VpcAddressCustomResource
-  #       - outputVpcCidrBlock
+  #       !GetAtt VpcAddressCustomResource.outputVpcCidrBlock
   #     VpcPeeringConnectionId: !Ref VpcPeering      
 
   # VpnRoutePrivate:
@@ -730,7 +705,7 @@ Resources:
   #     DestinationCidrBlock: 145.234.0.0/16
   #     GatewayId: !Ref VpnGateway
 
-  # VpnRoutePrivate2:
+  # VpnRoutePrivateSubnet2:
   #   Type: AWS::EC2::Route
   #   DependsOn: AttachVpnGateway
   #   Condition: CreateVpn
@@ -739,7 +714,7 @@ Resources:
   #     DestinationCidrBlock: 10.30.0.0/16
   #     GatewayId: !Ref VpnGateway      
 
-  # VpnRoutePrivate3:
+  # VpnRoutePrivateSubnet3:
   #   Type: AWS::EC2::Route
   #   DependsOn: AttachVpnGateway
   #   Condition: CreateVpn
@@ -784,7 +759,7 @@ Resources:
   #     DestinationCidrBlock: 10.100.4.0/22
   #     GatewayId: !Ref VpnGateway
 
-  # DmzRoutePrivate1: # Exception for RAS-TAM DMZ to be routed via VPN
+  # DmzRoutePrivateSubnet1: # Exception for RAS-TAM DMZ to be routed via VPN
   #   Type: AWS::EC2::Route
   #   DependsOn: AttachVpnGateway
   #   Condition: CreateVpn
@@ -817,99 +792,99 @@ Resources:
 
 # Associate the Public route table to the the first public subnet
 
-  SubnetRouteTableAssociationPublic1:
+  SubnetRouteTableAssociationPublicSubnet1:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
-      SubnetId: !Ref Public1
+      SubnetId: !Ref PublicSubnet1
       RouteTableId: !Ref RouteTablePublic
 
 # Associate the Public route table to the the second public subnet
 
-  SubnetRouteTableAssociationPublic2:
+  SubnetRouteTableAssociationPublicSubnet2:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
-      SubnetId: !Ref Public2
+      SubnetId: !Ref PublicSubnet2
       RouteTableId: !Ref RouteTablePublic
 
 # Associate the Public route table to the the third public subnet
 
-  SubnetRouteTableAssociationPublic3:
+  SubnetRouteTableAssociationPublicSubnet3:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
-      SubnetId: !Ref Public3
+      SubnetId: !Ref PublicSubnet3
       RouteTableId: !Ref RouteTablePublic
 
 # Associate the primary Private route table to the the first private subnet
 
-  SubnetRouteTableAssociationPrivate1:
+  SubnetRouteTableAssociationPrivateSubnet1:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
-      SubnetId: !Ref Private1
+      SubnetId: !Ref PrivateSubnet1
       RouteTableId: !Ref RouteTablePrivate
 
 # Associate the Secondary Private route table to the the second private subnet
 
-  SubnetRouteTableAssociationPrivate2:
+  SubnetRouteTableAssociationPrivateSubnet2:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
-      SubnetId: !Ref Private2
+      SubnetId: !Ref PrivateSubnet2
       RouteTableId: !Ref RouteTablePrivate
 
 # Associate the Secondary Private route table to the the third private subnet
 
-  SubnetRouteTableAssociationPrivate3:
+  SubnetRouteTableAssociationPrivateSubnet3:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
-      SubnetId: !Ref Private3
+      SubnetId: !Ref PrivateSubnet3
       RouteTableId: !Ref RouteTablePrivate
 
-  SecGrpDefaultAccess:
-    Type: AWS::EC2::SecurityGroup
-    Condition: CreateTGWAttachement
-    DependsOn: AttachmentToTransitGateway
-    Properties:
-      VpcId: !Ref Vpc
-      GroupName: !Sub ${AWS::StackName}-DefaultAccess
-      GroupDescription: Default access rules for Mgmt, Monitoring, AntiVirus and the like.
-      SecurityGroupIngress:
-        #SSH Management from 145.234.0.0/16
-        - IpProtocol: tcp
-          CidrIp: 145.234.0.0/16
-          FromPort: 22
-          ToPort: 22
-        #RDP Management from 145.234.0.0/16
-        - IpProtocol: tcp
-          CidrIp: 145.234.0.0/16
-          FromPort: 3389
-          ToPort: 3389
-        #TrendMicro from s7380
-        - IpProtocol: tcp
-          CidrIp: 145.234.72.123/32
-          FromPort: 4118
-          ToPort: 4118
-        #TrendMicro from s7387
-        - IpProtocol: tcp
-          CidrIp: 145.234.72.117/32
-          FromPort: 4118
-          ToPort: 4118
-        #SNMP from s6612 (cMK Bern active)
-        - IpProtocol: udp
-          CidrIp: 145.234.70.181/32
-          FromPort: 161
-          ToPort: 161
-        #SNMP from s6613 (cMK Bern passive)
-        - IpProtocol: udp
-          CidrIp: 145.234.70.182/32
-          FromPort: 161
-          ToPort: 161
-        #ICMP (Ping) from 145.234.0.0/16
-        - IpProtocol: icmp
-          CidrIp: 145.234.0.0/16
-          FromPort: -1
-          ToPort: -1
-      Tags:
-        - Key: Name
-          Value: !Sub ${AWS::StackName}-DefaultAccess
+  # SecGrpDefaultAccess:
+  #   Type: AWS::EC2::SecurityGroup
+  #   Condition: CreateTGWAttachement
+  #   DependsOn: AttachmentToTransitGateway
+  #   Properties:
+  #     VpcId: !Ref Vpc
+  #     GroupName: !Sub ${AWS::StackName}-DefaultAccess
+  #     GroupDescription: Default access rules for Mgmt, Monitoring, AntiVirus and the like.
+  #     SecurityGroupIngress:
+  #       #SSH Management from 145.234.0.0/16
+  #       - IpProtocol: tcp
+  #         CidrIp: 145.234.0.0/16
+  #         FromPort: 22
+  #         ToPort: 22
+  #       #RDP Management from 145.234.0.0/16
+  #       - IpProtocol: tcp
+  #         CidrIp: 145.234.0.0/16
+  #         FromPort: 3389
+  #         ToPort: 3389
+  #       #TrendMicro from s7380
+  #       - IpProtocol: tcp
+  #         CidrIp: 145.234.72.123/32
+  #         FromPort: 4118
+  #         ToPort: 4118
+  #       #TrendMicro from s7387
+  #       - IpProtocol: tcp
+  #         CidrIp: 145.234.72.117/32
+  #         FromPort: 4118
+  #         ToPort: 4118
+  #       #SNMP from s6612 (cMK Bern active)
+  #       - IpProtocol: udp
+  #         CidrIp: 145.234.70.181/32
+  #         FromPort: 161
+  #         ToPort: 161
+  #       #SNMP from s6613 (cMK Bern passive)
+  #       - IpProtocol: udp
+  #         CidrIp: 145.234.70.182/32
+  #         FromPort: 161
+  #         ToPort: 161
+  #       #ICMP (Ping) from 145.234.0.0/16
+  #       - IpProtocol: icmp
+  #         CidrIp: 145.234.0.0/16
+  #         FromPort: -1
+  #         ToPort: -1
+  #     Tags:
+  #       - Key: Name
+  #         Value: !Sub ${AWS::StackName}-DefaultAccess
           
 # Setup S3 VPC Endpoint if required
                   
@@ -927,133 +902,132 @@ Outputs:
   Vpc:
     Value: !Ref Vpc
     Export:
-      Name: !Sub ${AWS::StackName}
+      Name: Vpc
       
   VpcCidrBlock:
     Value:
-        Fn::GetAtt: 
-        - VpcAddressCustomResource
-        - outputVpcCidrBlock
+        !GetAtt VpcAddressCustomResource.outputVpcCidrBlock
     Export:
-      Name: !Sub ${AWS::StackName}-CidrBlock
+      Name: Vpc-CidrBlock
 
   Zone1:
     Value: !Ref Zone1
     Export:
-      Name: !Sub ${AWS::StackName}-Zone1
+      Name: Zone1
 
   Zone2:
     Value: !Ref Zone2
     Export:
-      Name: !Sub ${AWS::StackName}-Zone2
+      Name: Zone2
 
   Zone3:
     Value: !Ref Zone3
     Export:
-      Name: !Sub ${AWS::StackName}-Zone3
+      Name: Zone3
 
-  Public1:
-    Value: !Ref Public1
+  PublicSubnet1:
+    Value: !Ref PublicSubnet1
     Export:
-      Name: !Sub ${AWS::StackName}-Public1
+      Name: PublicSubnet1
       
-  Public1CidrBlock:
+  PublicSubnet1CidrBlock:
     Value:
-        Fn::GetAtt: 
-        - VpcAddressCustomResource
-        - outputAz1Public
+        !GetAtt VpcAddressCustomResource.outputAz1Public
     Export:
-      Name: !Sub ${AWS::StackName}-Public1-CidrBlock
+      Name: !Sub ${AWS::StackName}-PublicSubnet1-CidrBlock
 
-  Public2:
-    Value: !Ref Public2
+  PublicSubnet2:
+    Value: !Ref PublicSubnet2
     Export:
-      Name: !Sub ${AWS::StackName}-Public2
+      Name: !Sub ${AWS::StackName}-PublicSubnet2
       
-  Public2CidrBlock:
+  PublicSubnet2CidrBlock:
     Value:
-        Fn::GetAtt: 
-        - VpcAddressCustomResource
-        - outputAz2Public
+        !GetAtt VpcAddressCustomResource.outputAz2Public
     Export:
-      Name: !Sub ${AWS::StackName}-Public2-CidrBlock
+      Name: !Sub ${AWS::StackName}-PublicSubnet2-CidrBlock
 
-  Public3:
-    Value: !Ref Public3
+  PublicSubnet3:
+    Value: !Ref PublicSubnet3
     Export:
-      Name: !Sub ${AWS::StackName}-Public3
+      Name: !Sub ${AWS::StackName}-PublicSubnet3
       
-  Public3CidrBlock:
+  PublicSubnet3CidrBlock:
     Value:
-        Fn::GetAtt: 
-        - VpcAddressCustomResource
-        - outputAz3Public
+        !GetAtt VpcAddressCustomResource.outputAz3Public
     Export:
-      Name: !Sub ${AWS::StackName}-Public3-CidrBlock
+      Name: !Sub ${AWS::StackName}-PublicSubnet3-CidrBlock
 
-  Private1:
-    Value: !Ref Private1
+  PrivateSubnet1:
+    Value: !Ref PrivateSubnet1
     Export:
-      Name: !Sub ${AWS::StackName}-Private1
+      Name: !Sub ${AWS::StackName}-PrivateSubnet1
       
-  Private1CidrBlock:
+  PrivateSubnet1CidrBlock:
     Value:
-        Fn::GetAtt: 
-        - VpcAddressCustomResource
-        - outputAz1Private
+        !GetAtt VpcAddressCustomResource.outputAz1Private
     Export:
-      Name: !Sub ${AWS::StackName}-Private1-CidrBlock
+      Name: !Sub ${AWS::StackName}-PrivateSubnet1-CidrBlock
 
-  Private2:
-    Value: !Ref Private2
+  PrivateSubnet2:
+    Value: !Ref PrivateSubnet2
     Export:
-      Name: !Sub ${AWS::StackName}-Private2
+      Name: !Sub ${AWS::StackName}-PrivateSubnet2
       
-  Private2CidrBlock:
+  PrivateSubnet2CidrBlock:
     Value:
-        Fn::GetAtt: 
-        - VpcAddressCustomResource
-        - outputAz2Private
+        !GetAtt VpcAddressCustomResource.outputAz2Private
     Export:
-      Name: !Sub ${AWS::StackName}-Private2-CidrBlock
+      Name: !Sub ${AWS::StackName}-PrivateSubnet2-CidrBlock
       
-  Private3:
-    Value: !Ref Private3
+  PrivateSubnet3:
+    Value: !Ref PrivateSubnet3
     Export:
-      Name: !Sub ${AWS::StackName}-Private3
+      Name: !Sub ${AWS::StackName}-PrivateSubnet3
       
-  Private3CidrBlock:
+  PrivateSubnet3CidrBlock:
     Value:
-        Fn::GetAtt: 
-        - VpcAddressCustomResource
-        - outputAz3Private
+        !GetAtt VpcAddressCustomResource.outputAz3Private
     Export:
-      Name: !Sub ${AWS::StackName}-Private3-CidrBlock
+      Name: !Sub ${AWS::StackName}-PrivateSubnet3-CidrBlock
 
-  RouteTablePrivate:
-    Value: !Ref RouteTablePrivate
+  IntraVPCSubnet1:
+    Value: !Ref IntraVPCSubnet1
     Export:
-      Name: !Sub ${AWS::StackName}-RouteTablePrivate
+      Name: !Sub ${AWS::StackName}-IntraVPCSubnet1
+      
+  IntraVPCSubnet1CidrBlock:
+    Value:
+        !GetAtt VpcAddressCustomResource.outputAz1IntraVPC
+    Export:
+      Name: !Sub ${AWS::StackName}-IntraVPCSubnet1-CidrBlock
 
-  RouteTablePublic:
-    Value: !Ref RouteTablePublic
+  IntraVPCSubnet2:
+    Value: !Ref IntraVPCSubnet2
     Export:
-      Name: !Sub ${AWS::StackName}-RouteTablePublic
-
-  NatGateway:
-    Value: !Ref NatGateway
+      Name: !Sub ${AWS::StackName}-IntraVPCSubnet2
+      
+  IntraVPCSubnet2CidrBlock:
+    Value:
+        !GetAtt VpcAddressCustomResource.outputAz2IntraVPC
     Export:
-      Name: !Sub ${AWS::StackName}-NatGateway
+      Name: !Sub ${AWS::StackName}-IntraVPCSubnet2-CidrBlock
+      
+  IntraVPCSubnet3:
+    Value: !Ref IntraVPCSubnet3
+    Export:
+      Name: !Sub ${AWS::StackName}-IntraVPCSubnet3
+      
+  IntraVPCSubnet3CidrBlock:
+    Value:
+        !GetAtt VpcAddressCustomResource.outputAz3IntraVPC
+    Export:
+      Name: !Sub ${AWS::StackName}-IntraVPCSubnet3-CidrBlock
 
   NatGatewayEip:
     Value: !Ref NatGatewayEip
     Export:
       Name: !Sub ${AWS::StackName}-NatGatewayEip
-
-  InternetGateway:
-    Value: !Ref InternetGateway
-    Export:
-      Name: !Sub ${AWS::StackName}-InternetGateway
 
   # VpnGateway:
   #   Condition: CreateVpn
@@ -1073,11 +1047,11 @@ Outputs:
   #   Export:
   #     Name: !Sub ${AWS::StackName}-MgmtVpcPeering
 
-  SecGrpDefaultAccess:
-    Condition: CreateTGWAttachement
-    Value: !Ref SecGrpDefaultAccess
-    Export:
-      Name: !Sub ${AWS::StackName}-DefaultAccess
+  # SecGrpDefaultAccess:
+  #   Condition: CreateTGWAttachement
+  #   Value: !Ref SecGrpDefaultAccess
+  #   Export:
+  #     Name: !Sub ${AWS::StackName}-DefaultAccess
       
   # S3Endpoint:
   #   Condition: CreateS3EndPoint
