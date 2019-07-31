@@ -200,8 +200,7 @@ Resources:
     Properties:
       EnableDnsSupport: true
       EnableDnsHostnames: true
-      CidrBlock:
-        !GetAtt VpcAddressCustomResource.outputVpcCidrBlock
+      CidrBlock: !GetAtt VpcAddressCustomResource.outputVpcCidrBlock
       Tags:
       - Key: Name
         Value: !Sub ${AWS::StackName}
@@ -213,8 +212,7 @@ Resources:
     Properties:
       AvailabilityZone: !Ref Zone1
       VpcId: !Ref Vpc
-      CidrBlock:
-        !GetAtt VpcAddressCustomResource.outputAz1Public
+      CidrBlock: !GetAtt VpcAddressCustomResource.outputAz1Public
       Tags:
         - Key: Name
           Value: !Sub ${AWS::StackName}-PublicSubnet1
@@ -226,8 +224,7 @@ Resources:
     Properties:
       AvailabilityZone: !Ref Zone2
       VpcId: !Ref Vpc
-      CidrBlock:
-        !GetAtt VpcAddressCustomResource.outputAz2Public
+      CidrBlock: !GetAtt VpcAddressCustomResource.outputAz2Public
       Tags:
         - Key: Name
           Value: !Sub ${AWS::StackName}-PublicSubnet2
@@ -239,8 +236,7 @@ Resources:
     Properties:
       AvailabilityZone: !Ref Zone3
       VpcId: !Ref Vpc
-      CidrBlock:
-        !GetAtt VpcAddressCustomResource.outputAz3Public
+      CidrBlock: !GetAtt VpcAddressCustomResource.outputAz3Public
       Tags:
         - Key: Name
           Value: !Sub ${AWS::StackName}-PublicSubnet3
@@ -252,8 +248,7 @@ Resources:
     Properties:
       AvailabilityZone: !Ref Zone1
       VpcId: !Ref Vpc
-      CidrBlock:
-        !GetAtt VpcAddressCustomResource.outputAz1Private
+      CidrBlock: !GetAtt VpcAddressCustomResource.outputAz1Private
       Tags:
         - Key: Name
           Value: !Sub ${AWS::StackName}-PrivateSubnet1
@@ -265,8 +260,7 @@ Resources:
     Properties:
       AvailabilityZone: !Ref Zone2
       VpcId: !Ref Vpc
-      CidrBlock:
-        !GetAtt VpcAddressCustomResource.outputAz2Private
+      CidrBlock: !GetAtt VpcAddressCustomResource.outputAz2Private
       Tags:
         - Key: Name
           Value: !Sub ${AWS::StackName}-PrivateSubnet2
@@ -278,8 +272,7 @@ Resources:
     Properties:
       AvailabilityZone: !Ref Zone3
       VpcId: !Ref Vpc
-      CidrBlock:
-        !GetAtt VpcAddressCustomResource.outputAz3Private
+      CidrBlock: !GetAtt VpcAddressCustomResource.outputAz3Private
       Tags:
         - Key: Name
           Value: !Sub ${AWS::StackName}-PrivateSubnet3
@@ -291,8 +284,7 @@ Resources:
     Properties:
       AvailabilityZone: !Ref Zone1
       VpcId: !Ref Vpc
-      CidrBlock:
-        !GetAtt VpcAddressCustomResource.outputAz1IntraVPC
+      CidrBlock: !GetAtt VpcAddressCustomResource.outputAz1IntraVPC
       Tags:
         - Key: Name
           Value: !Sub ${AWS::StackName}-IntraVPCSubnet1
@@ -304,8 +296,7 @@ Resources:
     Properties:
       AvailabilityZone: !Ref Zone2
       VpcId: !Ref Vpc
-      CidrBlock:
-        !GetAtt VpcAddressCustomResource.outputAz2IntraVPC
+      CidrBlock: !GetAtt VpcAddressCustomResource.outputAz2IntraVPC
       Tags:
         - Key: Name
           Value: !Sub ${AWS::StackName}-IntraVPCSubnet2
@@ -317,8 +308,7 @@ Resources:
     Properties:
       AvailabilityZone: !Ref Zone3
       VpcId: !Ref Vpc
-      CidrBlock:
-        !GetAtt VpcAddressCustomResource.outputAz3IntraVPC
+      CidrBlock: !GetAtt VpcAddressCustomResource.outputAz3IntraVPC
       Tags:
         - Key: Name
           Value: !Sub ${AWS::StackName}-IntraVPCSubnet3
