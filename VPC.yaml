@@ -28,7 +28,7 @@ Parameters:
 
   TransitGatewayID:
     Type: String
-    Default: "tgw-024e45f39d9ac1bdc"
+    Default: "tgw-0ff58fcb30bb0fc83"
     Description: "ID of the Tamedia corporate transit gateway if access to the shared services is required"
 
   Zone1:
