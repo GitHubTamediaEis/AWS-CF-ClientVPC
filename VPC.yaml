@@ -19,7 +19,7 @@ Parameters:
 
   AccessToCorpSharedServices:
     Type: String
-    Default: "no"
+    Default: "yes"
     Description: "Do you need access to Tamedia Corp shared services and VPN? (yes/NO)"
     AllowedValues: 
       - "yes"
@@ -28,7 +28,7 @@ Parameters:
 
   TransitGatewayID:
     Type: String
-    Default: ""
+    Default: "tgw-024e45f39d9ac1bdc"
     Description: "ID of the Tamedia corporate transit gateway if access to the shared services is required"
 
   Zone1:
@@ -771,7 +771,7 @@ Resources:
     Properties:
       RouteTableId: !Ref RouteTableIntraVPC
       DestinationCidrBlock: 0.0.0.0/0
-      GatewayId: !Ref NatGateway
+      NatGatewayId: !Ref NatGateway
 
   NatRoutePrivate:
     Type: AWS::EC2::Route
