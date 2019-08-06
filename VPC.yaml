@@ -345,6 +345,17 @@ Resources:
           Value: !Sub ${AWS::StackName}-AttachToTransitGateway
       TransitGatewayId: !Ref TransitGatewayID
       VpcId: !Ref Vpc
+  
+# Call lambda for the required additionnal actions on the TGW attachment
+
+  TGWattachementCustomResource:
+    Type: Custom::NewTGWAttachement
+    Condition: CreateTGWAttachement
+    DependsOn: AttachmentToTransitGateway
+    Properties: 
+      ServiceToken: arn:aws:lambda:eu-west-1:733626620836:function:Shared-VPC-Prod-NewAttachmentLambda-1UKWWVY6OA33Q
+
+
 
   # VpnGateway:
   #   Type: AWS::EC2::VPNGateway
