@@ -353,7 +353,8 @@ Resources:
     Condition: CreateTGWAttachement
     # DependsOn: AttachmentToTransitGateway
     Properties: 
-      ServiceToken: arn:aws:lambda:eu-west-1:733626620836:function:Shared-VPC-Prod-NewAttachmentLambda-1UKWWVY6OA33Q
+      # ServiceToken: arn:aws:sns:eu-west-1:733626620836:NewAttachment
+      ServiceToken: arn:aws:sns:eu-west-1:778281744792:NewAttachment
 
 
 
