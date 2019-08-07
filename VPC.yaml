@@ -357,6 +357,7 @@ Resources:
   TGWattachementCustomResource:
     Type: Custom::NewTGWAttachement
     Condition: CreateTGWAttachement
+    DependsOn: NatGateway
     # DependsOn: AttachmentToTransitGateway
     Properties: 
       # ServiceToken: arn:aws:sns:eu-west-1:733626620836:NewAttachment
