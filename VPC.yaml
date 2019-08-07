@@ -362,10 +362,8 @@ Resources:
     Properties: 
       # ServiceToken: arn:aws:sns:eu-west-1:733626620836:NewAttachment
       ServiceToken: arn:aws:sns:eu-west-1:778281744792:NewAttachment
-      transitGatewayAttachmentId: !Ref AttachmentToTransitGateway
-      TransitGatewayRouteTableId: !Ref CustomImplementationID
-
-
+      TransitGatewayAttachmentId: !Ref AttachmentToTransitGateway
+      CustomImplementationID: !Ref CustomImplementationID
 
   # VpnGateway:
   #   Type: AWS::EC2::VPNGateway
