@@ -31,6 +31,11 @@ Parameters:
     Default: "tgw-0ff58fcb30bb0fc83"
     Description: "ID of the Tamedia corporate transit gateway if access to the shared services is required"
 
+  CustomImplementationID:
+    Type: String
+    Default: ""
+    Description: "Custom ID provided by Tamedia IT for specific implementation, if any"
+
   Zone1:
     Type: AWS::EC2::AvailabilityZone::Name
     Description: Select the zone that will be used as AZ1
@@ -125,6 +130,7 @@ Metadata:
       - Label: { default: AZ3 network setup }
         Parameters:
           - Zone3
+    
       # - Label: { default: Customer gateway for VPN (NEW or EXISTING -> only fill one!) }
       #   Parameters:
       #     - CustomerGatewayAddress
@@ -355,6 +361,8 @@ Resources:
     Properties: 
       # ServiceToken: arn:aws:sns:eu-west-1:733626620836:NewAttachment
       ServiceToken: arn:aws:sns:eu-west-1:778281744792:NewAttachment
+      transitGatewayAttachmentId: !Ref AttachmentToTransitGateway
+      TransitGatewayRouteTableId: !Ref CustomImplementationID
 
 
 
