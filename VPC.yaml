@@ -357,13 +357,13 @@ Resources:
   TGWattachementCustomResource:
     Type: Custom::NewTGWAttachement
     Condition: CreateTGWAttachement
-    DependsOn: NatGateway
-    # DependsOn: AttachmentToTransitGateway
+#    DependsOn: NatGateway
+#    DependsOn: AttachmentToTransitGateway
     Properties: 
       # ServiceToken: arn:aws:sns:eu-west-1:733626620836:NewAttachment
       ServiceToken: arn:aws:sns:eu-west-1:778281744792:NewAttachment
       TransitGatewayAttachmentId: !Ref AttachmentToTransitGateway
-      CustomImplementationID: !Ref CustomImplementationID
+      CustomImplementationId: !Ref CustomImplementationID
 
   # VpnGateway:
   #   Type: AWS::EC2::VPNGateway
