@@ -26,10 +26,10 @@ Parameters:
       - "no"
     ConstraintDescription: Value must be either "yes" or "no".
 
-  TransitGatewayID:
-    Type: String
-    Default: "tgw-0ff58fcb30bb0fc83"
-    Description: "ID of the Tamedia corporate transit gateway if access to the shared services is required"
+  # TransitGatewayID:
+  #   Type: String
+  #   Default: "tgw-0ff58fcb30bb0fc83"
+  #   Description: "ID of the Tamedia corporate transit gateway if access to the shared services is required"
 
   CustomImplementationID:
     Type: CommaDelimitedList
@@ -100,7 +100,7 @@ Metadata:
       #   default: Third AZ
 
 Conditions:
-  CreateTGWAttachement: !And [ !Equals [ !Ref ConnectToCorpSharedServices, "yes" ] , !Not [ !Equals [ !Ref TransitGatewayID, "" ] ] ]
+  CreateTGWAttachement: !Equals [ !Ref ConnectToCorpSharedServices, "yes" ]
   # DefineCustomDNSParameters: !Equals [ !Ref UseCustomizedDNSParameters, "yes" ]
 
 Mappings: 
@@ -490,7 +490,7 @@ Resources:
     Properties:
       RouteTableId: !Ref RouteTablePublic
       DestinationCidrBlock: 145.234.0.0/16
-      TransitGatewayId: !Ref TransitGatewayID
+      TransitGatewayId: !FindInMap [RegionMap, !Ref "AWS::Region", TransitGatewayId]
 
   RoutePublicTGW2:
     Type: AWS::EC2::Route
@@ -499,7 +499,7 @@ Resources:
     Properties:
       RouteTableId: !Ref RouteTablePublic
       DestinationCidrBlock: 10.0.0.0/8
-      TransitGatewayId: !Ref TransitGatewayID
+      TransitGatewayId: !FindInMap [RegionMap, !Ref "AWS::Region", TransitGatewayId]
 
   RoutePublicTGW3:
     Type: AWS::EC2::Route
@@ -508,7 +508,7 @@ Resources:
     Properties:
       RouteTableId: !Ref RouteTablePublic
       DestinationCidrBlock: 172.16.0.0/12
-      TransitGatewayId: !Ref TransitGatewayID
+      TransitGatewayId: !FindInMap [RegionMap, !Ref "AWS::Region", TransitGatewayId]
 
   RoutePublicTGW4:
     Type: AWS::EC2::Route
@@ -517,7 +517,7 @@ Resources:
     Properties:
       RouteTableId: !Ref RouteTablePublic
       DestinationCidrBlock: 192.168.0.0/16
-      TransitGatewayId: !Ref TransitGatewayID
+      TransitGatewayId: !FindInMap [RegionMap, !Ref "AWS::Region", TransitGatewayId]
 
   # VpnRoutePublicSubnet2:
   #   Type: AWS::EC2::Route
@@ -590,7 +590,7 @@ Resources:
     Properties:
       RouteTableId: !Ref RouteTablePrivate
       DestinationCidrBlock: 145.234.0.0/16
-      TransitGatewayId: !Ref TransitGatewayID
+      TransitGatewayId: !FindInMap [RegionMap, !Ref "AWS::Region", TransitGatewayId]
 
   RoutePrivateTGW2:
     Type: AWS::EC2::Route
@@ -599,7 +599,7 @@ Resources:
     Properties:
       RouteTableId: !Ref RouteTablePrivate
       DestinationCidrBlock: 10.0.0.0/8
-      TransitGatewayId: !Ref TransitGatewayID
+      TransitGatewayId: !FindInMap [RegionMap, !Ref "AWS::Region", TransitGatewayId]
 
   RoutePrivateTGW3:
     Type: AWS::EC2::Route
@@ -608,7 +608,7 @@ Resources:
     Properties:
       RouteTableId: !Ref RouteTablePrivate
       DestinationCidrBlock: 172.16.0.0/12
-      TransitGatewayId: !Ref TransitGatewayID
+      TransitGatewayId: !FindInMap [RegionMap, !Ref "AWS::Region", TransitGatewayId]
 
   RoutePrivateTGW4:
     Type: AWS::EC2::Route
@@ -617,7 +617,7 @@ Resources:
     Properties:
       RouteTableId: !Ref RouteTablePrivate
       DestinationCidrBlock: 192.168.0.0/16
-      TransitGatewayId: !Ref TransitGatewayID
+      TransitGatewayId: !FindInMap [RegionMap, !Ref "AWS::Region", TransitGatewayId]
       
   # PeeringRoutePrivate:
   #   Type: AWS::EC2::Route
