@@ -1,4 +1,4 @@
-AWSTemplateFormatVersion: 2010-09-09
+AWSTemplateFormatVersion: "2010-09-09"
 Description: Setup a VPC with private, public and intraVPC subnets in three AZs. Includes one NAT- and one Internet-Gateway. Optional Transit Gateway attachement and custom features.
 
 Parameters:
@@ -32,7 +32,7 @@ Parameters:
     Description: "ID of the Tamedia corporate transit gateway if access to the shared services is required"
 
   CustomImplementationID:
-    Type: String
+    Type: CommaDelimitedList
     Default: ""
     Description: "Custom ID provided by Tamedia IT for specific implementation, if any"
 
@@ -51,16 +51,6 @@ Parameters:
     Description: Select the zone that will be used as AZ3
     Default: eu-west-1c
     
-  # CustomerGatewayId:
-  #   Type: String
-  #   Default: none
-  #   Description: ID of the *existing* customer gateway
-
-  # CustomerGatewayAddress:
-  #   Type: String
-  #   Description: IP address of the *new* customer gateway
-  #   Default: none
-  
   # UseCustomizedDNSParameters:
   #   Type: String
   #   Default: "no"
@@ -74,42 +64,6 @@ Parameters:
   #   Type: String
   #   Default: eu-west-1.compute.internal
   #   Description: DNS domain name (included in DHCP options)
-    
-  # DnsServers:
-  #   Type: CommaDelimitedList
-  #   Default: 10.64.64.10, 10.64.96.10
-  #   Description: DNS server address(es) (included in DHCP options)
-    
-  # NtpServers:
-  #   Type: CommaDelimitedList
-  #   Default: 10.64.64.10, 10.64.96.10
-  #   Description: NTP server address(es) (included in DHCP options)
-    
-  # PeerVpc:
-  #   Type: String
-  #   Default: none
-  #   Description: ID of the shared services Vpc
-    
-  # PeerVpcCidr:
-  #   Type: String
-  #   Description: IP CIDR range of the peer Vpc
-
-  # PeerVpcPublicRouteTable:
-  #   Type: String
-  #   Description: ID of the public route table of the peer Vpc
-    
-  # PeerVpcPrivateRouteTable:
-  #   Type: String
-  #   Description: ID of the private route table of the peer Vpc    
-  
-  # UseS3EndPoint:
-  #   Type: String
-  #   Default: "no"
-  #   Description: Create a VPC Endpoint to access S3 (NO/yes) 
-  #   AllowedValues: 
-  #     - "yes"
-  #     - "no"
-  #   ConstraintDescription: Value must be either "yes" or "no".
 
 Metadata:
   AWS::CloudFormation::Interface:
@@ -130,23 +84,6 @@ Metadata:
       - Label: { default: AZ3 network setup }
         Parameters:
           - Zone3
-    
-      # - Label: { default: Customer gateway for VPN (NEW or EXISTING -> only fill one!) }
-      #   Parameters:
-      #     - CustomerGatewayAddress
-      #     - CustomerGatewayId
-      # - Label: { default: Shared services Vpc peering }
-      #   Parameters:
-      #     - PeerVpc
-      #     - PeerVpcCidr
-      #     - PeerVpcPublicRouteTable
-      #     - PeerVpcPrivateRouteTable
-      # - Label: { default: DHCP options }
-      #   Parameters:
-      #     - UseCustomizedDNSParameters
-      #     - DnsDomainName
-      #     - DnsServers
-      #     - NtpServers
 
     ParameterLabels:
       VpcSize:
@@ -161,32 +98,19 @@ Metadata:
         default: Second AZ
       Zone3:
         default: Third AZ
-      # CustomerGatewayId:
-      #   default: ID of the *existing* customer gateway
-      # CustomerGatewayAddress:
-      #   default: IP address of the *new* customer gateway
-      # DnsDomainName:
-      #   default: DNS domain name
-      # DnsServers:
-      #   default: DNS servers, comma delimited
-      # NtpServers:
-      #   default: NTP servers, comma delimited
-      # PeerVpc:
-      #   default: Peer Vpc ID
-      # PeerVpcCidr:
-      #   default: Peer Vpc IP CIDR
-      # PeerVpcPublicRouteTable:
-      #   default: ID of the public route table of the peer VPC
-      # PeerVpcPrivateRouteTable:
-      #   default: ID of the private route table of the peer VPC
 
 Conditions:
-  # CreateVpcPeering: !Not [!Equals [ !Ref PeerVpc, none ]]
-  # CreateVpn: !Or [!Not [!Equals [ !Ref CustomerGatewayId, none ]], !Not [!Equals [ !Ref CustomerGatewayAddress, none ]]]
-  # CreateCustomerGateway: !Not [!Equals [ !Ref CustomerGatewayAddress, none ]]
-  # CreateS3EndPoint: !Equals [ !Ref UseS3EndPoint, "yes" ]
   CreateTGWAttachement: !And [ !Equals [ !Ref AccessToCorpSharedServices, "yes" ] , !Not [ !Equals [ !Ref TransitGatewayID, "" ] ] ]
   # DefineCustomDNSParameters: !Equals [ !Ref UseCustomizedDNSParameters, "yes" ]
+
+Mappings: 
+  RegionMap: 
+    eu-west-1: 
+      # "TransitGatewayId": "tgw-024e45f39d9ac1bdc"
+## Temporary use Sandbox TGW
+      "TransitGatewayId": "tgw-024e45f39d9ac1bdc"
+    eu-central-1: 
+      "TransitGatewayId": ""
 
 Resources:
 
@@ -348,8 +272,8 @@ Resources:
         - !Ref PrivateSubnet3
       Tags:
         - Key: Name
-          Value: !Sub ${AWS::StackName}-AttachToTransitGateway
-      TransitGatewayId: !Ref TransitGatewayID
+          Value: !Sub ${AWS::AccountId}-AttachToTransitGateway
+      TransitGatewayId: !FindInMap [RegionMap, !Ref "AWS::Region", TransitGatewayId]
       VpcId: !Ref Vpc
   
 # Call lambda for the required additionnal actions on the TGW attachment
