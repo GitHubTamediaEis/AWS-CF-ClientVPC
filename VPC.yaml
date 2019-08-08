@@ -112,11 +112,16 @@ Mappings:
       "AZ1": "eu-west-1a"
       "AZ2": "eu-west-1b"
       "AZ3": "eu-west-1c"
+       # "NetAttachmentSNSARN": "arn:aws:sns:eu-west-1:733626620836:NewAttachment"
+## Temporary use Sandbox TGW
+      "NetAttachmentSNSARN": "arn:aws:sns:eu-west-1:778281744792:NewAttachment"
+
     eu-central-1: 
       "TransitGatewayId": ""
       "AZ1": "eu-central-1a"
       "AZ2": "eu-central-1b"
       "AZ3": "eu-central-1c"
+      "NetAttachmentSNSARN": ""
 
 
 Resources:
@@ -291,8 +296,7 @@ Resources:
 #    DependsOn: NatGateway
 #    DependsOn: AttachmentToTransitGateway
     Properties: 
-      # ServiceToken: arn:aws:sns:eu-west-1:733626620836:NewAttachment
-      ServiceToken: arn:aws:sns:eu-west-1:778281744792:NewAttachment
+      ServiceToken: !FindInMap [RegionMap, !Ref "AWS::Region", NetAttachmentSNSARN]
       TransitGatewayAttachmentId: !Ref AttachmentToTransitGateway
       CustomImplementationId: !Ref CustomImplementationID
 
