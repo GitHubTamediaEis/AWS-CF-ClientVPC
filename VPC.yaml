@@ -13,11 +13,11 @@ Parameters:
       - "L"
       - "XL"
      
-  Token:
+  ValidationToken:
     Type: String
     Description: "If you select a VPC size other than S, you need to request a token from Network Services first (network@tamedia.ch) providing the following details: Requirement for bigger VPC, the region to deploy in, your account ID and the desired VPC size."
 
-  AccessToCorpSharedServices:
+  ConnectToCorpSharedServices:
     Type: String
     Default: "yes"
     Description: "Do you need access to Tamedia Corp shared services and VPN? (yes/NO)"
@@ -36,20 +36,20 @@ Parameters:
     Default: ""
     Description: "Custom ID provided by Tamedia IT for specific implementation, if any"
 
-  Zone1:
-    Type: AWS::EC2::AvailabilityZone::Name
-    Description: Select the zone that will be used as AZ1
-    Default: eu-west-1a
+  # Zone1:
+  #   Type: AWS::EC2::AvailabilityZone::Name
+  #   Description: Select the zone that will be used as AZ1
+  #   Default: eu-west-1a
 
-  Zone2:
-    Type: AWS::EC2::AvailabilityZone::Name
-    Description: Select the zone that will be used as AZ2
-    Default: eu-west-1b
+  # Zone2:
+  #   Type: AWS::EC2::AvailabilityZone::Name
+  #   Description: Select the zone that will be used as AZ2
+  #   Default: eu-west-1b
 
-  Zone3:
-    Type: AWS::EC2::AvailabilityZone::Name
-    Description: Select the zone that will be used as AZ3
-    Default: eu-west-1c
+  # Zone3:
+  #   Type: AWS::EC2::AvailabilityZone::Name
+  #   Description: Select the zone that will be used as AZ3
+  #   Default: eu-west-1c
     
   # UseCustomizedDNSParameters:
   #   Type: String
@@ -71,36 +71,36 @@ Metadata:
       - Label: { default: Vpc size }
         Parameters:
           - VpcSize
-          - Token
-      - Label: { default: Access to corporate shared services }
+          - ValidationToken
+      - Label: { default: Connect to corporate shared services }
         Parameters:
-          - AccessToCorpSharedServices
-      - Label: { default: AZ1 network setup }
-        Parameters:
-          - Zone1
-      - Label: { default: AZ2 network setup }
-        Parameters:
-          - Zone2
-      - Label: { default: AZ3 network setup }
-        Parameters:
-          - Zone3
+          - ConnectToCorpSharedServices
+      # - Label: { default: AZ1 network setup }
+      #   Parameters:
+      #     - Zone1
+      # - Label: { default: AZ2 network setup }
+      #   Parameters:
+      #     - Zone2
+      # - Label: { default: AZ3 network setup }
+      #   Parameters:
+      #     - Zone3
 
     ParameterLabels:
       VpcSize:
         default: Size of the VPC
-      Token:
+      ValidationToken:
         default: Token for M, L and XL sized VPC
-      AccessToCorpSharedServices:
+      ConnectToCorpSharedServices:
         default: Enable access to corporate shared services
-      Zone1:
-        default: First AZ
-      Zone2:
-        default: Second AZ
-      Zone3:
-        default: Third AZ
+      # Zone1:
+      #   default: First AZ
+      # Zone2:
+      #   default: Second AZ
+      # Zone3:
+      #   default: Third AZ
 
 Conditions:
-  CreateTGWAttachement: !And [ !Equals [ !Ref AccessToCorpSharedServices, "yes" ] , !Not [ !Equals [ !Ref TransitGatewayID, "" ] ] ]
+  CreateTGWAttachement: !And [ !Equals [ !Ref ConnectToCorpSharedServices, "yes" ] , !Not [ !Equals [ !Ref TransitGatewayID, "" ] ] ]
   # DefineCustomDNSParameters: !Equals [ !Ref UseCustomizedDNSParameters, "yes" ]
 
 Mappings: 
@@ -109,8 +109,15 @@ Mappings:
       # "TransitGatewayId": "tgw-024e45f39d9ac1bdc"
 ## Temporary use Sandbox TGW
       "TransitGatewayId": "tgw-024e45f39d9ac1bdc"
+      "AZ1": "eu-west-1a"
+      "AZ2": "eu-west-1b"
+      "AZ3": "eu-west-1c"
     eu-central-1: 
       "TransitGatewayId": ""
+      "AZ1": "eu-central-1a"
+      "AZ2": "eu-central-1b"
+      "AZ3": "eu-central-1c"
+
 
 Resources:
 
@@ -121,7 +128,7 @@ Resources:
     Properties: 
       ServiceToken: arn:aws:sns:eu-west-1:733626620836:VPCAddressCustomResource-Prod-SnsTopic
       VpcSize: !Ref VpcSize
-      Token: !Ref Token
+      Token: !Ref ValidationToken
 
 # Setup the main Vpc component
 
@@ -140,7 +147,7 @@ Resources:
   PublicSubnet1:
     Type: AWS::EC2::Subnet
     Properties:
-      AvailabilityZone: !Ref Zone1
+      AvailabilityZone: !FindInMap [RegionMap, !Ref "AWS::Region", AZ1]
       VpcId: !Ref Vpc
       CidrBlock: !GetAtt VpcAddressCustomResource.outputAz1Public
       Tags:
@@ -152,7 +159,7 @@ Resources:
   PublicSubnet2:
     Type: AWS::EC2::Subnet
     Properties:
-      AvailabilityZone: !Ref Zone2
+      AvailabilityZone: !FindInMap [RegionMap, !Ref "AWS::Region", AZ2]
       VpcId: !Ref Vpc
       CidrBlock: !GetAtt VpcAddressCustomResource.outputAz2Public
       Tags:
@@ -164,7 +171,7 @@ Resources:
   PublicSubnet3:
     Type: AWS::EC2::Subnet
     Properties:
-      AvailabilityZone: !Ref Zone3
+      AvailabilityZone: !FindInMap [RegionMap, !Ref "AWS::Region", AZ3]
       VpcId: !Ref Vpc
       CidrBlock: !GetAtt VpcAddressCustomResource.outputAz3Public
       Tags:
@@ -176,7 +183,7 @@ Resources:
   PrivateSubnet1:
     Type: AWS::EC2::Subnet
     Properties:
-      AvailabilityZone: !Ref Zone1
+      AvailabilityZone: !FindInMap [RegionMap, !Ref "AWS::Region", AZ1]
       VpcId: !Ref Vpc
       CidrBlock: !GetAtt VpcAddressCustomResource.outputAz1Private
       Tags:
@@ -188,7 +195,7 @@ Resources:
   PrivateSubnet2:
     Type: AWS::EC2::Subnet
     Properties:
-      AvailabilityZone: !Ref Zone2
+      AvailabilityZone: !FindInMap [RegionMap, !Ref "AWS::Region", AZ2]
       VpcId: !Ref Vpc
       CidrBlock: !GetAtt VpcAddressCustomResource.outputAz2Private
       Tags:
@@ -200,7 +207,7 @@ Resources:
   PrivateSubnet3:
     Type: AWS::EC2::Subnet
     Properties:
-      AvailabilityZone: !Ref Zone3
+      AvailabilityZone: !FindInMap [RegionMap, !Ref "AWS::Region", AZ3]
       VpcId: !Ref Vpc
       CidrBlock: !GetAtt VpcAddressCustomResource.outputAz3Private
       Tags:
@@ -212,7 +219,7 @@ Resources:
   IntraVPCSubnet1:
     Type: AWS::EC2::Subnet
     Properties:
-      AvailabilityZone: !Ref Zone1
+      AvailabilityZone: !FindInMap [RegionMap, !Ref "AWS::Region", AZ1]
       VpcId: !Ref Vpc
       CidrBlock: !GetAtt VpcAddressCustomResource.outputAz1IntraVPC
       Tags:
@@ -224,7 +231,7 @@ Resources:
   IntraVPCSubnet2:
     Type: AWS::EC2::Subnet
     Properties:
-      AvailabilityZone: !Ref Zone2
+      AvailabilityZone: !FindInMap [RegionMap, !Ref "AWS::Region", AZ2]
       VpcId: !Ref Vpc
       CidrBlock: !GetAtt VpcAddressCustomResource.outputAz2IntraVPC
       Tags:
@@ -236,7 +243,7 @@ Resources:
   IntraVPCSubnet3:
     Type: AWS::EC2::Subnet
     Properties:
-      AvailabilityZone: !Ref Zone3
+      AvailabilityZone: !FindInMap [RegionMap, !Ref "AWS::Region", AZ3]
       VpcId: !Ref Vpc
       CidrBlock: !GetAtt VpcAddressCustomResource.outputAz3IntraVPC
       Tags:
@@ -843,20 +850,20 @@ Outputs:
     Export:
       Name: Vpc-CidrBlock
 
-  Zone1:
-    Value: !Ref Zone1
+  AZ1:
+    Value: !FindInMap [RegionMap, !Ref "AWS::Region", AZ1]
     Export:
-      Name: Zone1
+      Name: AZ1
 
-  Zone2:
-    Value: !Ref Zone2
+  AZ2:
+    Value: !FindInMap [RegionMap, !Ref "AWS::Region", AZ2]
     Export:
-      Name: Zone2
+      Name: AZ2
 
-  Zone3:
-    Value: !Ref Zone3
+  AZ3:
+    Value: !FindInMap [RegionMap, !Ref "AWS::Region", AZ3]
     Export:
-      Name: Zone3
+      Name: AZ3
 
   PublicSubnet1:
     Value: !Ref PublicSubnet1
