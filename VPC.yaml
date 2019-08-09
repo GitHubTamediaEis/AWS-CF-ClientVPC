@@ -31,8 +31,8 @@ Parameters:
   #   Default: "tgw-0ff58fcb30bb0fc83"
   #   Description: "ID of the Tamedia corporate transit gateway if access to the shared services is required"
 
-  CustomImplementationID:
-    Type: CommaDelimitedList
+  CustomImplementationTag:
+    Type: String
     Default: ""
     Description: "Custom ID provided by Tamedia IT for specific implementation, if any"
 
@@ -297,8 +297,9 @@ Resources:
 #    DependsOn: AttachmentToTransitGateway
     Properties: 
       ServiceToken: !FindInMap [RegionMap, !Ref "AWS::Region", NetAttachmentSNSARN]
+      # Region: !Ref "AWS::Region"
       TransitGatewayAttachmentId: !Ref AttachmentToTransitGateway
-      CustomImplementationId: !Ref CustomImplementationID
+      CustomImplementationTag: !Ref CustomImplementationTag
 
   # VpnGateway:
   #   Type: AWS::EC2::VPNGateway
