@@ -121,7 +121,7 @@ Mappings:
       "AZ1": "eu-central-1a"
       "AZ2": "eu-central-1b"
       "AZ3": "eu-central-1c"
-      "NetAttachmentSNSARN": ""
+      "NetAttachmentSNSARN": "arn:aws:sns:eu-central-1:733626620836:NewAttachment"
 
 
 Resources:
