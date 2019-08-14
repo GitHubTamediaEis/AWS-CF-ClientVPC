@@ -108,7 +108,7 @@ Mappings:
     eu-west-1: 
       # "TransitGatewayId": "tgw-024e45f39d9ac1bdc"
 ## Temporary use Sandbox TGW
-      "TransitGatewayId": "tgw-0f206dbe363ee48ac"
+      "TransitGatewayId": "tgw-0027759d22e91dd30"
       "AZ1": "eu-west-1a"
       "AZ2": "eu-west-1b"
       "AZ3": "eu-west-1c"
