@@ -93,7 +93,7 @@ Mappings:
       "AZ1": "eu-west-1a"
       "AZ2": "eu-west-1b"
       "AZ3": "eu-west-1c"
-       "NetAttachmentSNSARN": "arn:aws:sns:eu-west-1:733626620836:NewAttachment"
+      "NetAttachmentSNSARN": "arn:aws:sns:eu-west-1:733626620836:NewAttachment"
 ## Temporary use Sandbox TGW
       # "NetAttachmentSNSARN": "arn:aws:sns:eu-west-1:778281744792:NewAttachment"
 
