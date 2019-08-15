@@ -26,32 +26,13 @@ Parameters:
       - "no"
     ConstraintDescription: Value must be either "yes" or "no".
 
-  # TransitGatewayID:
-  #   Type: String
-  #   Default: "tgw-0ff58fcb30bb0fc83"
-  #   Description: "ID of the Tamedia corporate transit gateway if access to the shared services is required"
-
   CustomImplementationTag:
     Type: String
     Default: ""
     Description: "Custom ID provided by Tamedia IT for specific implementation, if any"
 
-  # Zone1:
-  #   Type: AWS::EC2::AvailabilityZone::Name
-  #   Description: Select the zone that will be used as AZ1
-  #   Default: eu-west-1a
-
-  # Zone2:
-  #   Type: AWS::EC2::AvailabilityZone::Name
-  #   Description: Select the zone that will be used as AZ2
-  #   Default: eu-west-1b
-
-  # Zone3:
-  #   Type: AWS::EC2::AvailabilityZone::Name
-  #   Description: Select the zone that will be used as AZ3
-  #   Default: eu-west-1c
     
-  # UseCustomizedDNSParameters:
+  # UseCustomizedDNSResolution:
   #   Type: String
   #   Default: "no"
   #   Description: Customize DNS resolution parameters (NO/yes) 
@@ -106,15 +87,15 @@ Conditions:
 Mappings: 
   RegionMap: 
     eu-west-1: 
-      # "TransitGatewayId": "tgw-024e45f39d9ac1bdc"
+      "TransitGatewayId": "tgw-007d36bdceb60c458"
 ## Temporary use Sandbox TGW
-      "TransitGatewayId": "tgw-0027759d22e91dd30"
+      # "TransitGatewayId": "tgw-0027759d22e91dd30"
       "AZ1": "eu-west-1a"
       "AZ2": "eu-west-1b"
       "AZ3": "eu-west-1c"
-       # "NetAttachmentSNSARN": "arn:aws:sns:eu-west-1:733626620836:NewAttachment"
+       "NetAttachmentSNSARN": "arn:aws:sns:eu-west-1:733626620836:NewAttachment"
 ## Temporary use Sandbox TGW
-      "NetAttachmentSNSARN": "arn:aws:sns:eu-west-1:778281744792:NewAttachment"
+      # "NetAttachmentSNSARN": "arn:aws:sns:eu-west-1:778281744792:NewAttachment"
 
     eu-central-1: 
       "TransitGatewayId": ""
