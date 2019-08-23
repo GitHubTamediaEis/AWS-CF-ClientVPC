@@ -860,127 +860,127 @@ Outputs:
     Value:
         !GetAtt VpcAddressCustomResource.outputAz1Public
     Export:
-      Name: !Sub ${AWS::StackName}-PublicSubnet1-CidrBlock
+      Name: PublicSubnet1-CidrBlock
 
   PublicSubnet2:
     Value: !Ref PublicSubnet2
     Export:
-      Name: !Sub ${AWS::StackName}-PublicSubnet2
+      Name: PublicSubnet2
       
   PublicSubnet2CidrBlock:
     Value:
         !GetAtt VpcAddressCustomResource.outputAz2Public
     Export:
-      Name: !Sub ${AWS::StackName}-PublicSubnet2-CidrBlock
+      Name: PublicSubnet2-CidrBlock
 
   PublicSubnet3:
     Value: !Ref PublicSubnet3
     Export:
-      Name: !Sub ${AWS::StackName}-PublicSubnet3
+      Name: PublicSubnet3
       
   PublicSubnet3CidrBlock:
     Value:
         !GetAtt VpcAddressCustomResource.outputAz3Public
     Export:
-      Name: !Sub ${AWS::StackName}-PublicSubnet3-CidrBlock
+      Name: PublicSubnet3-CidrBlock
 
   PrivateSubnet1:
     Value: !Ref PrivateSubnet1
     Export:
-      Name: !Sub ${AWS::StackName}-PrivateSubnet1
+      Name: PrivateSubnet1
       
   PrivateSubnet1CidrBlock:
     Value:
         !GetAtt VpcAddressCustomResource.outputAz1Private
     Export:
-      Name: !Sub ${AWS::StackName}-PrivateSubnet1-CidrBlock
+      Name: PrivateSubnet1-CidrBlock
 
   PrivateSubnet2:
     Value: !Ref PrivateSubnet2
     Export:
-      Name: !Sub ${AWS::StackName}-PrivateSubnet2
+      Name: PrivateSubnet2
       
   PrivateSubnet2CidrBlock:
     Value:
         !GetAtt VpcAddressCustomResource.outputAz2Private
     Export:
-      Name: !Sub ${AWS::StackName}-PrivateSubnet2-CidrBlock
+      Name: PrivateSubnet2-CidrBlock
       
   PrivateSubnet3:
     Value: !Ref PrivateSubnet3
     Export:
-      Name: !Sub ${AWS::StackName}-PrivateSubnet3
+      Name: PrivateSubnet3
       
   PrivateSubnet3CidrBlock:
     Value:
         !GetAtt VpcAddressCustomResource.outputAz3Private
     Export:
-      Name: !Sub ${AWS::StackName}-PrivateSubnet3-CidrBlock
+      Name: PrivateSubnet3-CidrBlock
 
   IntraVPCSubnet1:
     Value: !Ref IntraVPCSubnet1
     Export:
-      Name: !Sub ${AWS::StackName}-IntraVPCSubnet1
+      Name: IntraVPCSubnet1
       
   IntraVPCSubnet1CidrBlock:
     Value:
         !GetAtt VpcAddressCustomResource.outputAz1IntraVPC
     Export:
-      Name: !Sub ${AWS::StackName}-IntraVPCSubnet1-CidrBlock
+      Name: IntraVPCSubnet1-CidrBlock
 
   IntraVPCSubnet2:
     Value: !Ref IntraVPCSubnet2
     Export:
-      Name: !Sub ${AWS::StackName}-IntraVPCSubnet2
+      Name: IntraVPCSubnet2
       
   IntraVPCSubnet2CidrBlock:
     Value:
         !GetAtt VpcAddressCustomResource.outputAz2IntraVPC
     Export:
-      Name: !Sub ${AWS::StackName}-IntraVPCSubnet2-CidrBlock
+      Name: IntraVPCSubnet2-CidrBlock
       
   IntraVPCSubnet3:
     Value: !Ref IntraVPCSubnet3
     Export:
-      Name: !Sub ${AWS::StackName}-IntraVPCSubnet3
+      Name: IntraVPCSubnet3
       
   IntraVPCSubnet3CidrBlock:
     Value:
         !GetAtt VpcAddressCustomResource.outputAz3IntraVPC
     Export:
-      Name: !Sub ${AWS::StackName}-IntraVPCSubnet3-CidrBlock
+      Name: IntraVPCSubnet3-CidrBlock
 
   NatGatewayEip:
     Value: !Ref NatGatewayEip
     Export:
-      Name: !Sub ${AWS::StackName}-NatGatewayEip
+      Name: NatGatewayEip
 
   # VpnGateway:
   #   Condition: CreateVpn
   #   Value: !Ref VpnGateway
   #   Export:
-  #     Name: !Sub ${AWS::StackName}-VpnGateway
+  #     Name: VpnGateway
 
   # DhcpOptions:
   #   Condition: DefineCustomDNSParameters
   #   Value: !Ref DhcpOptions
   #   Export:
-  #     Name: !Sub ${AWS::StackName}-DhcpOptions
+  #     Name: DhcpOptions
 
   # VpcPeering:
   #   Condition: CreateVpcPeering
   #   Value: !Ref VpcPeering
   #   Export:
-  #     Name: !Sub ${AWS::StackName}-MgmtVpcPeering
+  #     Name: MgmtVpcPeering
 
   # SecGrpDefaultAccess:
   #   Condition: CreateTGWAttachement
   #   Value: !Ref SecGrpDefaultAccess
   #   Export:
-  #     Name: !Sub ${AWS::StackName}-DefaultAccess
+  #     Name: DefaultAccess
       
   # S3Endpoint:
   #   Condition: CreateS3EndPoint
   #   Value: !Ref S3Endpoint
   #   Export:
-  #     Name: !Sub ${AWS::StackName}-S3Endpoint
+  #     Name: S3Endpoint
