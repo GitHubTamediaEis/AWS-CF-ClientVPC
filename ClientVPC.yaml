@@ -93,7 +93,7 @@ Mappings:
       "AZ1": "eu-west-1a"
       "AZ2": "eu-west-1b"
       "AZ3": "eu-west-1c"
-      "NetAttachmentSNSARN": "arn:aws:sns:eu-west-1:733626620836:NewAttachment"
+      "NetAttachmentSNSARN": "arn:aws:sns:eu-west-1:733626620836:NewClientAttachmentLambda"
 ## Temporary use Sandbox TGW
       # "NetAttachmentSNSARN": "arn:aws:sns:eu-west-1:778281744792:NewAttachment"
 
@@ -102,17 +102,17 @@ Mappings:
       "AZ1": "eu-central-1a"
       "AZ2": "eu-central-1b"
       "AZ3": "eu-central-1c"
-      "NetAttachmentSNSARN": "arn:aws:sns:eu-central-1:733626620836:NewAttachment"
+      "NetAttachmentSNSARN": "arn:aws:sns:eu-west-1:733626620836:NewClientAttachmentLambda"
 
 
 Resources:
 
-# Create the VpcAddressCustomResource
+# Create the VPCIpAddresses
 
   VpcAddressCustomResource:
     Type: Custom::VpcAddress
     Properties: 
-      ServiceToken: arn:aws:sns:eu-west-1:733626620836:VPCAddressCustomResource-Prod-SnsTopic
+      ServiceToken: arn:aws:sns:eu-west-1:733626620836:VPCIpAddressesLambda
       VpcSize: !Ref VpcSize
       Token: !Ref ValidationToken
 
