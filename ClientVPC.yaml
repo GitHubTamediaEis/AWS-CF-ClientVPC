@@ -95,7 +95,7 @@ Mappings:
       "ClientAttachmentSNSARN": "arn:aws:sns:eu-west-1:733626620836:ClientAttachmentCustomResource"
 
     eu-central-1: 
-      "TransitGatewayId": ""
+      "TransitGatewayId": "tgw-009829a53d1bc69b8"
       "AZ1": "eu-central-1a"
       "AZ2": "eu-central-1b"
       "AZ3": "eu-central-1c"
