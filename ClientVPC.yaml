@@ -82,6 +82,7 @@ Metadata:
 
 Conditions:
   CreateTGWAttachement: !Equals [ !Ref ConnectToCorpSharedServices, "yes" ]
+  CreateIntraVpc: !Not [ !Equals [ !Ref VpcSize, "S" ] ]
   # DefineCustomDNSParameters: !Equals [ !Ref UseCustomizedDNSParameters, "yes" ]
 
 Mappings: 
@@ -98,7 +99,7 @@ Mappings:
       "AZ1": "eu-central-1a"
       "AZ2": "eu-central-1b"
       "AZ3": "eu-central-1c"
-      "ClientAttachmentSNSARN": "arn:aws:sns:eu-west-1:733626620836:ClientAttachmentCustomResource"
+      "ClientAttachmentSNSARN": "arn:aws:sns:eu-central-1:733626620836:ClientAttachmentCustomResource"
 
 
 Resources:
@@ -200,6 +201,7 @@ Resources:
 
   IntraVPCSubnet1:
     Type: AWS::EC2::Subnet
+    Condition: CreateIntraVpc
     Properties:
       AvailabilityZone: !FindInMap [RegionMap, !Ref "AWS::Region", AZ1]
       VpcId: !Ref Vpc
@@ -212,6 +214,7 @@ Resources:
 
   IntraVPCSubnet2:
     Type: AWS::EC2::Subnet
+    Condition: CreateIntraVpc
     Properties:
       AvailabilityZone: !FindInMap [RegionMap, !Ref "AWS::Region", AZ2]
       VpcId: !Ref Vpc
@@ -224,6 +227,7 @@ Resources:
 
   IntraVPCSubnet3:
     Type: AWS::EC2::Subnet
+    Condition: CreateIntraVpc
     Properties:
       AvailabilityZone: !FindInMap [RegionMap, !Ref "AWS::Region", AZ3]
       VpcId: !Ref Vpc
@@ -432,6 +436,7 @@ Resources:
 
   RouteTableIntraVPC:
     Type: AWS::EC2::RouteTable
+    Condition: CreateIntraVpc
     Properties:
       VpcId: !Ref Vpc
       Tags:
@@ -699,6 +704,7 @@ Resources:
 
   InternetRouteIntraVPC:
     Type: AWS::EC2::Route
+    Condition: CreateIntraVpc
     DependsOn: AttachGateway
     Properties:
       RouteTableId: !Ref RouteTableIntraVPC
@@ -914,33 +920,39 @@ Outputs:
       Name: PrivateSubnet3-CidrBlock
 
   IntraVPCSubnet1:
+    Condition: CreateIntraVpc
     Value: !Ref IntraVPCSubnet1
     Export:
       Name: IntraVPCSubnet1
       
   IntraVPCSubnet1CidrBlock:
+    Condition: CreateIntraVpc
     Value:
         !GetAtt VpcIpAddressesCustomResource.outputAz1IntraVPC
     Export:
       Name: IntraVPCSubnet1-CidrBlock
 
   IntraVPCSubnet2:
+    Condition: CreateIntraVpc
     Value: !Ref IntraVPCSubnet2
     Export:
       Name: IntraVPCSubnet2
       
   IntraVPCSubnet2CidrBlock:
+    Condition: CreateIntraVpc
     Value:
         !GetAtt VpcIpAddressesCustomResource.outputAz2IntraVPC
     Export:
       Name: IntraVPCSubnet2-CidrBlock
       
   IntraVPCSubnet3:
+    Condition: CreateIntraVpc
     Value: !Ref IntraVPCSubnet3
     Export:
       Name: IntraVPCSubnet3
       
   IntraVPCSubnet3CidrBlock:
+    Condition: CreateIntraVpc
     Value:
         !GetAtt VpcIpAddressesCustomResource.outputAz3IntraVPC
     Export:
