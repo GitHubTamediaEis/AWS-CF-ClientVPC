@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: Setup a VPC with private, public and intraVPC subnets in three AZs. Includes one NAT- and one Internet-Gateway. Optional Transit Gateway attachement and custom features.
+Description: Setup a VPC with private, public and IntraVpc subnets in three AZs. Includes one NAT- and one Internet-Gateway. Optional Transit Gateway attachement and custom features.
 
 Parameters:
 
@@ -199,42 +199,42 @@ Resources:
 
 # Setup the primary private subnet
 
-  IntraVPCSubnet1:
+  IntraVpcSubnet1:
     Type: AWS::EC2::Subnet
     Condition: CreateIntraVpc
     Properties:
       AvailabilityZone: !FindInMap [RegionMap, !Ref "AWS::Region", AZ1]
       VpcId: !Ref Vpc
-      CidrBlock: !GetAtt VpcIpAddressesCustomResource.outputAz1IntraVPC
+      CidrBlock: !GetAtt VpcIpAddressesCustomResource.outputAz1IntraVpc
       Tags:
         - Key: Name
-          Value: !Sub ${AWS::StackName}-IntraVPCSubnet1
+          Value: !Sub ${AWS::StackName}-IntraVpcSubnet1
 
 # Setup the secondary private subnet
 
-  IntraVPCSubnet2:
+  IntraVpcSubnet2:
     Type: AWS::EC2::Subnet
     Condition: CreateIntraVpc
     Properties:
       AvailabilityZone: !FindInMap [RegionMap, !Ref "AWS::Region", AZ2]
       VpcId: !Ref Vpc
-      CidrBlock: !GetAtt VpcIpAddressesCustomResource.outputAz2IntraVPC
+      CidrBlock: !GetAtt VpcIpAddressesCustomResource.outputAz2IntraVpc
       Tags:
         - Key: Name
-          Value: !Sub ${AWS::StackName}-IntraVPCSubnet2
+          Value: !Sub ${AWS::StackName}-IntraVpcSubnet2
 
 # Setup the third private subnet
 
-  IntraVPCSubnet3:
+  IntraVpcSubnet3:
     Type: AWS::EC2::Subnet
     Condition: CreateIntraVpc
     Properties:
       AvailabilityZone: !FindInMap [RegionMap, !Ref "AWS::Region", AZ3]
       VpcId: !Ref Vpc
-      CidrBlock: !GetAtt VpcIpAddressesCustomResource.outputAz3IntraVPC
+      CidrBlock: !GetAtt VpcIpAddressesCustomResource.outputAz3IntraVpc
       Tags:
         - Key: Name
-          Value: !Sub ${AWS::StackName}-IntraVPCSubnet3
+          Value: !Sub ${AWS::StackName}-IntraVpcSubnet3
 
 # Setup the internet gateway
 
@@ -434,14 +434,14 @@ Resources:
 
 # Setup the primary intra VPC route table
 
-  RouteTableIntraVPC:
+  RouteTableIntraVpc:
     Type: AWS::EC2::RouteTable
     Condition: CreateIntraVpc
     Properties:
       VpcId: !Ref Vpc
       Tags:
         - Key: Name
-          Value: !Sub ${AWS::StackName}-IntraVPC
+          Value: !Sub ${AWS::StackName}-IntraVpc
 
 # Add routes for public subnets
 
@@ -702,12 +702,12 @@ Resources:
       DestinationCidrBlock: 145.234.240.0/22
       NatGatewayId: !Ref NatGateway
 
-  InternetRouteIntraVPC:
+  InternetRouteIntraVpc:
     Type: AWS::EC2::Route
     Condition: CreateIntraVpc
     DependsOn: AttachGateway
     Properties:
-      RouteTableId: !Ref RouteTableIntraVPC
+      RouteTableId: !Ref RouteTableIntraVpc
       DestinationCidrBlock: 0.0.0.0/0
       NatGatewayId: !Ref NatGateway
 
@@ -765,6 +765,33 @@ Resources:
     Properties:
       SubnetId: !Ref PrivateSubnet3
       RouteTableId: !Ref RouteTablePrivate
+
+# Associate the primary IntraVpc route table to the the first private subnet
+
+  SubnetRouteTableAssociationIntraVpcSubnet1:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Condition: CreateIntraVpc
+    Properties:
+      SubnetId: !Ref IntraVpcSubnet1
+      RouteTableId: !Ref RouteTableIntraVpc
+
+# Associate the Secondary IntraVpc route table to the the second private subnet
+
+  SubnetRouteTableAssociationIntraVpcSubnet2:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Condition: CreateIntraVpc
+    Properties:
+      SubnetId: !Ref IntraVpcSubnet2
+      RouteTableId: !Ref RouteTableIntraVpc
+
+# Associate the Secondary IntraVpc route table to the the third private subnet
+
+  SubnetRouteTableAssociationIntraVpcSubnet3:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Condition: CreateIntraVpc
+    Properties:
+      SubnetId: !Ref IntraVpcSubnet3
+      RouteTableId: !Ref RouteTableIntraVpc
 
   # SecGrpDefaultAccess:
   #   Type: AWS::EC2::SecurityGroup
@@ -919,44 +946,44 @@ Outputs:
     Export:
       Name: PrivateSubnet3-CidrBlock
 
-  IntraVPCSubnet1:
+  IntraVpcSubnet1:
     Condition: CreateIntraVpc
-    Value: !Ref IntraVPCSubnet1
+    Value: !Ref IntraVpcSubnet1
     Export:
-      Name: IntraVPCSubnet1
+      Name: IntraVpcSubnet1
       
-  IntraVPCSubnet1CidrBlock:
+  IntraVpcSubnet1CidrBlock:
     Condition: CreateIntraVpc
     Value:
-        !GetAtt VpcIpAddressesCustomResource.outputAz1IntraVPC
+        !GetAtt VpcIpAddressesCustomResource.outputAz1IntraVpc
     Export:
-      Name: IntraVPCSubnet1-CidrBlock
+      Name: IntraVpcSubnet1-CidrBlock
 
-  IntraVPCSubnet2:
+  IntraVpcSubnet2:
     Condition: CreateIntraVpc
-    Value: !Ref IntraVPCSubnet2
+    Value: !Ref IntraVpcSubnet2
     Export:
-      Name: IntraVPCSubnet2
+      Name: IntraVpcSubnet2
       
-  IntraVPCSubnet2CidrBlock:
+  IntraVpcSubnet2CidrBlock:
     Condition: CreateIntraVpc
     Value:
-        !GetAtt VpcIpAddressesCustomResource.outputAz2IntraVPC
+        !GetAtt VpcIpAddressesCustomResource.outputAz2IntraVpc
     Export:
-      Name: IntraVPCSubnet2-CidrBlock
+      Name: IntraVpcSubnet2-CidrBlock
       
-  IntraVPCSubnet3:
+  IntraVpcSubnet3:
     Condition: CreateIntraVpc
-    Value: !Ref IntraVPCSubnet3
+    Value: !Ref IntraVpcSubnet3
     Export:
-      Name: IntraVPCSubnet3
+      Name: IntraVpcSubnet3
       
-  IntraVPCSubnet3CidrBlock:
+  IntraVpcSubnet3CidrBlock:
     Condition: CreateIntraVpc
     Value:
-        !GetAtt VpcIpAddressesCustomResource.outputAz3IntraVPC
+        !GetAtt VpcIpAddressesCustomResource.outputAz3IntraVpc
     Export:
-      Name: IntraVPCSubnet3-CidrBlock
+      Name: IntraVpcSubnet3-CidrBlock
 
   NatGatewayEip:
     Value: !Ref NatGatewayEip
