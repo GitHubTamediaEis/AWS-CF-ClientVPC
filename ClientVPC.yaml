@@ -281,6 +281,7 @@ Resources:
       # Region: !Ref "AWS::Region"
       TransitGatewayAttachmentId: !Ref AttachmentToTransitGateway
       CustomImplementationTag: !Ref CustomImplementationTag
+      VpcCidrBlock: !GetAtt VpcIpAddressesCustomResource.outputVpcCidrBlock
 
   # VpnGateway:
   #   Type: AWS::EC2::VPNGateway
