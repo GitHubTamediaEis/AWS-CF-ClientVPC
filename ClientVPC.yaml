@@ -31,7 +31,7 @@ Parameters:
     Default: ""
     Description: "Custom ID provided by Tamedia IT for specific implementation, if any"
 
-    
+
   # UseCustomizedDNSResolution:
   #   Type: String
   #   Default: "no"
@@ -123,7 +123,7 @@ Resources:
       CidrBlock: !GetAtt VpcIpAddressesCustomResource.outputVpcCidrBlock
       Tags:
       - Key: Name
-        Value: !Sub ${AWS::StackName}
+        Value: SC-VPC
 
 # Setup the primary public subnet
 
@@ -135,7 +135,7 @@ Resources:
       CidrBlock: !GetAtt VpcIpAddressesCustomResource.outputAz1Public
       Tags:
         - Key: Name
-          Value: !Sub ${AWS::StackName}-PublicSubnet1
+          Value: SC-VPC-PublicSubnet1
 
 # Setup the secondary public subnet
 
@@ -147,7 +147,7 @@ Resources:
       CidrBlock: !GetAtt VpcIpAddressesCustomResource.outputAz2Public
       Tags:
         - Key: Name
-          Value: !Sub ${AWS::StackName}-PublicSubnet2
+          Value: SC-VPC-PublicSubnet2
 
 # Setup the third public subnet
 
@@ -159,7 +159,7 @@ Resources:
       CidrBlock: !GetAtt VpcIpAddressesCustomResource.outputAz3Public
       Tags:
         - Key: Name
-          Value: !Sub ${AWS::StackName}-PublicSubnet3
+          Value: SC-VPC-PublicSubnet3
 
 # Setup the primary private subnet
 
@@ -171,7 +171,7 @@ Resources:
       CidrBlock: !GetAtt VpcIpAddressesCustomResource.outputAz1Private
       Tags:
         - Key: Name
-          Value: !Sub ${AWS::StackName}-PrivateSubnet1
+          Value: SC-VPC-PrivateSubnet1
 
 # Setup the secondary private subnet
 
@@ -183,7 +183,7 @@ Resources:
       CidrBlock: !GetAtt VpcIpAddressesCustomResource.outputAz2Private
       Tags:
         - Key: Name
-          Value: !Sub ${AWS::StackName}-PrivateSubnet2
+          Value: SC-VPC-PrivateSubnet2
 
 # Setup the third private subnet
 
@@ -195,7 +195,7 @@ Resources:
       CidrBlock: !GetAtt VpcIpAddressesCustomResource.outputAz3Private
       Tags:
         - Key: Name
-          Value: !Sub ${AWS::StackName}-PrivateSubnet3
+          Value: SC-VPC-PrivateSubnet3
 
 # Setup the primary private subnet
 
@@ -208,7 +208,7 @@ Resources:
       CidrBlock: !GetAtt VpcIpAddressesCustomResource.outputAz1IntraVpc
       Tags:
         - Key: Name
-          Value: !Sub ${AWS::StackName}-IntraVpcSubnet1
+          Value: SC-VPC-IntraVpcSubnet1
 
 # Setup the secondary private subnet
 
@@ -221,7 +221,7 @@ Resources:
       CidrBlock: !GetAtt VpcIpAddressesCustomResource.outputAz2IntraVpc
       Tags:
         - Key: Name
-          Value: !Sub ${AWS::StackName}-IntraVpcSubnet2
+          Value: SC-VPC-IntraVpcSubnet2
 
 # Setup the third private subnet
 
@@ -234,7 +234,7 @@ Resources:
       CidrBlock: !GetAtt VpcIpAddressesCustomResource.outputAz3IntraVpc
       Tags:
         - Key: Name
-          Value: !Sub ${AWS::StackName}-IntraVpcSubnet3
+          Value: SC-VPC-IntraVpcSubnet3
 
 # Setup the internet gateway
 
@@ -243,7 +243,7 @@ Resources:
     Properties:
      Tags:
        - Key: Name
-         Value: !Sub ${AWS::StackName}-InternetGateway
+         Value: SC-VPC-InternetGateway
 
 # Attach the internet gateway to the Vpc
 
@@ -290,7 +290,7 @@ Resources:
   #     Type: ipsec.1
   #     Tags:
   #       - Key: Name
-  #         Value: !Sub ${AWS::StackName}-VpnGateway
+  #         Value: SC-VPC-VpnGateway
 
   # CustomerVpnGateway:  
   #   Type: "AWS::EC2::CustomerGateway"
@@ -301,7 +301,7 @@ Resources:
   #     Type: ipsec.1
   #     Tags:
   #       - Key: Name
-  #         Value: !Sub ${AWS::StackName}-CustomerGateway
+  #         Value: SC-VPC-CustomerGateway
 
   # VpnConnection:
   #   Type: AWS::EC2::VPNConnection
@@ -313,7 +313,7 @@ Resources:
   #     CustomerGatewayId: !If [CreateCustomerGateway, !Ref CustomerVpnGateway, !Ref CustomerGatewayId]
   #     Tags:
   #       - Key: Name
-  #         Value: !Sub ${AWS::StackName}-VpnConnection
+  #         Value: SC-VPC-VpnConnection
 
   # VpnConnectionRoute:
   #   Type: AWS::EC2::VPNConnectionRoute
@@ -383,7 +383,7 @@ Resources:
       SubnetId: !Ref PublicSubnet1
       Tags:
         - Key: Name
-          Value: !Sub ${AWS::StackName}-NatGateway
+          Value: SC-VPC-NatGateway
 
   # DhcpOptions:
   #   Type: AWS::EC2::DHCPOptions
@@ -394,7 +394,7 @@ Resources:
   #     NtpServers: !Ref NtpServers
   #     Tags:
   #       - Key: Name
-  #         Value: !Sub ${AWS::StackName}-DhcpOptions
+  #         Value: SC-VPC-DhcpOptions
 
   # AttachDhcpOptions:
   #   Type: AWS::EC2::VPCDHCPOptionsAssociation
@@ -411,7 +411,7 @@ Resources:
   #     VpcId: !Ref Vpc
   #     Tags:
   #       - Key: Name
-  #         Value: !Sub ${AWS::StackName}-MgmtVpcPeering
+  #         Value: SC-VPC-MgmtVpcPeering
 
 # Setup a public route table
 
@@ -421,7 +421,7 @@ Resources:
       VpcId: !Ref Vpc
       Tags:
         - Key: Name
-          Value: !Sub ${AWS::StackName}-Public
+          Value: SC-VPC-Public
 
 # Setup the primary private route table
 
@@ -431,7 +431,7 @@ Resources:
       VpcId: !Ref Vpc
       Tags:
         - Key: Name
-          Value: !Sub ${AWS::StackName}-Private
+          Value: SC-VPC-Private
 
 # Setup the primary intra VPC route table
 
@@ -442,7 +442,7 @@ Resources:
       VpcId: !Ref Vpc
       Tags:
         - Key: Name
-          Value: !Sub ${AWS::StackName}-IntraVpc
+          Value: SC-VPC-IntraVpc
 
 # Add routes for public subnets
 
@@ -794,65 +794,6 @@ Resources:
       SubnetId: !Ref IntraVpcSubnet3
       RouteTableId: !Ref RouteTableIntraVpc
 
-  # SecGrpDefaultAccess:
-  #   Type: AWS::EC2::SecurityGroup
-  #   Condition: CreateTGWAttachement
-  #   DependsOn: AttachmentToTransitGateway
-  #   Properties:
-  #     VpcId: !Ref Vpc
-  #     GroupName: !Sub ${AWS::StackName}-DefaultAccess
-  #     GroupDescription: Default access rules for Mgmt, Monitoring, AntiVirus and the like.
-  #     SecurityGroupIngress:
-  #       #SSH Management from 145.234.0.0/16
-  #       - IpProtocol: tcp
-  #         CidrIp: 145.234.0.0/16
-  #         FromPort: 22
-  #         ToPort: 22
-  #       #RDP Management from 145.234.0.0/16
-  #       - IpProtocol: tcp
-  #         CidrIp: 145.234.0.0/16
-  #         FromPort: 3389
-  #         ToPort: 3389
-  #       #TrendMicro from s7380
-  #       - IpProtocol: tcp
-  #         CidrIp: 145.234.72.123/32
-  #         FromPort: 4118
-  #         ToPort: 4118
-  #       #TrendMicro from s7387
-  #       - IpProtocol: tcp
-  #         CidrIp: 145.234.72.117/32
-  #         FromPort: 4118
-  #         ToPort: 4118
-  #       #SNMP from s6612 (cMK Bern active)
-  #       - IpProtocol: udp
-  #         CidrIp: 145.234.70.181/32
-  #         FromPort: 161
-  #         ToPort: 161
-  #       #SNMP from s6613 (cMK Bern passive)
-  #       - IpProtocol: udp
-  #         CidrIp: 145.234.70.182/32
-  #         FromPort: 161
-  #         ToPort: 161
-  #       #ICMP (Ping) from 145.234.0.0/16
-  #       - IpProtocol: icmp
-  #         CidrIp: 145.234.0.0/16
-  #         FromPort: -1
-  #         ToPort: -1
-  #     Tags:
-  #       - Key: Name
-  #         Value: !Sub ${AWS::StackName}-DefaultAccess
-          
-# Setup S3 VPC Endpoint if required
-                  
-  # S3Endpoint:
-  #   Type: 'AWS::EC2::VPCEndpoint'
-  #   Condition: CreateS3EndPoint
-  #   Properties:    
-  #     RouteTableIds:
-  #       - !Ref RouteTablePrivate
-  #     ServiceName: !Sub com.amazonaws.${AWS::Region}.s3
-  #     VpcId: !Ref Vpc
-
 Outputs:
 
   Vpc:
@@ -869,17 +810,17 @@ Outputs:
   AZ1:
     Value: !FindInMap [RegionMap, !Ref "AWS::Region", AZ1]
     Export:
-      Name: AZ1
+      Name: Az1
 
   AZ2:
     Value: !FindInMap [RegionMap, !Ref "AWS::Region", AZ2]
     Export:
-      Name: AZ2
+      Name: Az2
 
   AZ3:
     Value: !FindInMap [RegionMap, !Ref "AWS::Region", AZ3]
     Export:
-      Name: AZ3
+      Name: Az3
 
   PublicSubnet1:
     Value: !Ref PublicSubnet1
