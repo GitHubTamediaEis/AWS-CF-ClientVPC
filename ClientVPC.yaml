@@ -31,7 +31,6 @@ Parameters:
     Default: ""
     Description: "Custom ID provided by Tamedia IT for specific implementation, if any"
 
-
   # UseCustomizedDNSResolution:
   #   Type: String
   #   Default: "no"
