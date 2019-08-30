@@ -55,13 +55,13 @@ Metadata:
       - Label: { default: Connect to corporate shared services }
         Parameters:
           - ConnectToCorpSharedServices
-      # - Label: { default: AZ1 network setup }
+      # - Label: { default: Az1 network setup }
       #   Parameters:
       #     - Zone1
-      # - Label: { default: AZ2 network setup }
+      # - Label: { default: Az2 network setup }
       #   Parameters:
       #     - Zone2
-      # - Label: { default: AZ3 network setup }
+      # - Label: { default: Az3 network setup }
       #   Parameters:
       #     - Zone3
 
@@ -88,16 +88,16 @@ Mappings:
   RegionMap: 
     eu-west-1: 
       "TransitGatewayId": "tgw-009829a53d1bc69b8"
-      "AZ1": "eu-west-1a"
-      "AZ2": "eu-west-1b"
-      "AZ3": "eu-west-1c"
+      "Az1": "eu-west-1a"
+      "Az2": "eu-west-1b"
+      "Az3": "eu-west-1c"
       "ClientAttachmentSNSARN": "arn:aws:sns:eu-west-1:733626620836:ClientAttachmentCustomResource"
 
     eu-central-1: 
       "TransitGatewayId": "tgw-0f3e8be4156fab7c1"
-      "AZ1": "eu-central-1a"
-      "AZ2": "eu-central-1b"
-      "AZ3": "eu-central-1c"
+      "Az1": "eu-central-1a"
+      "Az2": "eu-central-1b"
+      "Az3": "eu-central-1c"
       "ClientAttachmentSNSARN": "arn:aws:sns:eu-central-1:733626620836:ClientAttachmentCustomResource"
 
 
@@ -129,7 +129,7 @@ Resources:
   PublicSubnet1:
     Type: AWS::EC2::Subnet
     Properties:
-      AvailabilityZone: !FindInMap [RegionMap, !Ref "AWS::Region", AZ1]
+      AvailabilityZone: !FindInMap [RegionMap, !Ref "AWS::Region", Az1]
       VpcId: !Ref Vpc
       CidrBlock: !GetAtt VpcIpAddressesCustomResource.outputAz1Public
       Tags:
@@ -141,7 +141,7 @@ Resources:
   PublicSubnet2:
     Type: AWS::EC2::Subnet
     Properties:
-      AvailabilityZone: !FindInMap [RegionMap, !Ref "AWS::Region", AZ2]
+      AvailabilityZone: !FindInMap [RegionMap, !Ref "AWS::Region", Az2]
       VpcId: !Ref Vpc
       CidrBlock: !GetAtt VpcIpAddressesCustomResource.outputAz2Public
       Tags:
@@ -153,7 +153,7 @@ Resources:
   PublicSubnet3:
     Type: AWS::EC2::Subnet
     Properties:
-      AvailabilityZone: !FindInMap [RegionMap, !Ref "AWS::Region", AZ3]
+      AvailabilityZone: !FindInMap [RegionMap, !Ref "AWS::Region", Az3]
       VpcId: !Ref Vpc
       CidrBlock: !GetAtt VpcIpAddressesCustomResource.outputAz3Public
       Tags:
@@ -165,7 +165,7 @@ Resources:
   PrivateSubnet1:
     Type: AWS::EC2::Subnet
     Properties:
-      AvailabilityZone: !FindInMap [RegionMap, !Ref "AWS::Region", AZ1]
+      AvailabilityZone: !FindInMap [RegionMap, !Ref "AWS::Region", Az1]
       VpcId: !Ref Vpc
       CidrBlock: !GetAtt VpcIpAddressesCustomResource.outputAz1Private
       Tags:
@@ -177,7 +177,7 @@ Resources:
   PrivateSubnet2:
     Type: AWS::EC2::Subnet
     Properties:
-      AvailabilityZone: !FindInMap [RegionMap, !Ref "AWS::Region", AZ2]
+      AvailabilityZone: !FindInMap [RegionMap, !Ref "AWS::Region", Az2]
       VpcId: !Ref Vpc
       CidrBlock: !GetAtt VpcIpAddressesCustomResource.outputAz2Private
       Tags:
@@ -189,7 +189,7 @@ Resources:
   PrivateSubnet3:
     Type: AWS::EC2::Subnet
     Properties:
-      AvailabilityZone: !FindInMap [RegionMap, !Ref "AWS::Region", AZ3]
+      AvailabilityZone: !FindInMap [RegionMap, !Ref "AWS::Region", Az3]
       VpcId: !Ref Vpc
       CidrBlock: !GetAtt VpcIpAddressesCustomResource.outputAz3Private
       Tags:
@@ -202,7 +202,7 @@ Resources:
     Type: AWS::EC2::Subnet
     Condition: CreateIntraVpc
     Properties:
-      AvailabilityZone: !FindInMap [RegionMap, !Ref "AWS::Region", AZ1]
+      AvailabilityZone: !FindInMap [RegionMap, !Ref "AWS::Region", Az1]
       VpcId: !Ref Vpc
       CidrBlock: !GetAtt VpcIpAddressesCustomResource.outputAz1IntraVpc
       Tags:
@@ -215,7 +215,7 @@ Resources:
     Type: AWS::EC2::Subnet
     Condition: CreateIntraVpc
     Properties:
-      AvailabilityZone: !FindInMap [RegionMap, !Ref "AWS::Region", AZ2]
+      AvailabilityZone: !FindInMap [RegionMap, !Ref "AWS::Region", Az2]
       VpcId: !Ref Vpc
       CidrBlock: !GetAtt VpcIpAddressesCustomResource.outputAz2IntraVpc
       Tags:
@@ -228,7 +228,7 @@ Resources:
     Type: AWS::EC2::Subnet
     Condition: CreateIntraVpc
     Properties:
-      AvailabilityZone: !FindInMap [RegionMap, !Ref "AWS::Region", AZ3]
+      AvailabilityZone: !FindInMap [RegionMap, !Ref "AWS::Region", Az3]
       VpcId: !Ref Vpc
       CidrBlock: !GetAtt VpcIpAddressesCustomResource.outputAz3IntraVpc
       Tags:
@@ -806,18 +806,18 @@ Outputs:
     Export:
       Name: Vpc-CidrBlock
 
-  AZ1:
-    Value: !FindInMap [RegionMap, !Ref "AWS::Region", AZ1]
+  Az1:
+    Value: !FindInMap [RegionMap, !Ref "AWS::Region", Az1]
     Export:
       Name: Az1
 
-  AZ2:
-    Value: !FindInMap [RegionMap, !Ref "AWS::Region", AZ2]
+  Az2:
+    Value: !FindInMap [RegionMap, !Ref "AWS::Region", Az2]
     Export:
       Name: Az2
 
-  AZ3:
-    Value: !FindInMap [RegionMap, !Ref "AWS::Region", AZ3]
+  Az3:
+    Value: !FindInMap [RegionMap, !Ref "AWS::Region", Az3]
     Export:
       Name: Az3
 
