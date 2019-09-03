@@ -31,14 +31,14 @@ Parameters:
     Default: ""
     Description: "Custom ID provided by Tamedia IT for specific implementation, if any"
 
-  # UseCustomizedDNSResolution:
-  #   Type: String
-  #   Default: "no"
-  #   Description: Customize DNS resolution parameters (NO/yes) 
-  #   AllowedValues: 
-  #     - "yes"
-  #     - "no"
-  #   ConstraintDescription: Value must be either "yes" or "no".
+  UseCustomizedDnsParameters:
+    Type: String
+    Default: "no"
+    Description: Customize DNS resolution parameters (NO/yes) 
+    AllowedValues: 
+      - "yes"
+      - "no"
+    ConstraintDescription: Value must be either "yes" or "no".
   
   # DnsDomainName:
   #   Type: String
@@ -82,7 +82,7 @@ Metadata:
 Conditions:
   CreateTGWAttachement: !Equals [ !Ref ConnectToCorpSharedServices, "yes" ]
   CreateIntraVpc: !Not [ !Equals [ !Ref VpcSize, "S" ] ]
-  # DefineCustomDNSParameters: !Equals [ !Ref UseCustomizedDNSParameters, "yes" ]
+  DefineCustomDnsParameters: !Equals [ !Ref UseCustomizedDnsParameters, "yes" ]
 
 Mappings: 
   RegionMap: 
@@ -92,6 +92,7 @@ Mappings:
       "Az2": "eu-west-1b"
       "Az3": "eu-west-1c"
       "ClientAttachmentSNSARN": "arn:aws:sns:eu-west-1:733626620836:ClientAttachmentCustomResource"
+      "MediaItResolverRuleId": "rslvr-rr-19d7f32e7a0a41959"
 
     eu-central-1: 
       "TransitGatewayId": "tgw-09b008f794dcaf554"
@@ -99,6 +100,7 @@ Mappings:
       "Az2": "eu-central-1b"
       "Az3": "eu-central-1c"
       "ClientAttachmentSNSARN": "arn:aws:sns:eu-central-1:733626620836:ClientAttachmentCustomResource"
+      "MediaItResolverRuleId": "rslvr-rr-19d7f32e7a0a41959"
 
 
 Resources:
@@ -792,6 +794,16 @@ Resources:
     Properties:
       SubnetId: !Ref IntraVpcSubnet3
       RouteTableId: !Ref RouteTableIntraVpc
+
+# Associate mediait.ch DNS reslover rule if needed
+
+  AssociateMediaItResolverRule:
+    Condition: DefineCustomDnsParameters
+    Type: AWS::Route53Resolver::ResolverRuleAssociation
+    Properties: 
+      Name: MediaItDnsRuleAssociation
+      ResolverRuleId: !FindInMap [RegionMap, !Ref "AWS::Region", MediaItResolverRuleId]
+      VPCId: !Ref Vpc
 
 Outputs:
 
