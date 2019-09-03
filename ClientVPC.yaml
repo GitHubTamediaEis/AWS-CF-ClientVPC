@@ -26,24 +26,19 @@ Parameters:
       - "no"
     ConstraintDescription: Value must be either "yes" or "no".
 
-  CustomImplementationTag:
-    Type: String
-    Default: ""
-    Description: "Custom ID provided by Tamedia IT for specific implementation, if any"
-
-  UseCustomizedDnsParameters:
+  UseMediaItDnsResolver:
     Type: String
     Default: "no"
-    Description: Customize DNS resolution parameters (NO/yes) 
+    Description: Use mediait.ch domain services (NO/yes) 
     AllowedValues: 
       - "yes"
       - "no"
     ConstraintDescription: Value must be either "yes" or "no".
-  
-  # DnsDomainName:
-  #   Type: String
-  #   Default: eu-west-1.compute.internal
-  #   Description: DNS domain name (included in DHCP options)
+
+  CustomImplementationTag:
+    Type: String
+    Default: ""
+    Description: "Custom ID provided by Tamedia IT for specific implementation, if any"
 
 Metadata:
   AWS::CloudFormation::Interface:
@@ -82,7 +77,7 @@ Metadata:
 Conditions:
   CreateTGWAttachement: !Equals [ !Ref ConnectToCorpSharedServices, "yes" ]
   CreateIntraVpc: !Not [ !Equals [ !Ref VpcSize, "S" ] ]
-  DefineCustomDnsParameters: !Equals [ !Ref UseCustomizedDnsParameters, "yes" ]
+  AssociateMediaItDnsResolver: !Equals [ !Ref UseMediaItDnsResolver, "yes" ]
 
 Mappings: 
   RegionMap: 
@@ -798,7 +793,7 @@ Resources:
 # Associate mediait.ch DNS reslover rule if needed
 
   AssociateMediaItResolverRule:
-    Condition: DefineCustomDnsParameters
+    Condition: AssociateMediaItDnsResolver
     Type: AWS::Route53Resolver::ResolverRuleAssociation
     Properties: 
       Name: MediaItDnsRuleAssociation
@@ -942,33 +937,3 @@ Outputs:
     Value: !Ref NatGatewayEip
     Export:
       Name: NatGatewayEip
-
-  # VpnGateway:
-  #   Condition: CreateVpn
-  #   Value: !Ref VpnGateway
-  #   Export:
-  #     Name: VpnGateway
-
-  # DhcpOptions:
-  #   Condition: DefineCustomDNSParameters
-  #   Value: !Ref DhcpOptions
-  #   Export:
-  #     Name: DhcpOptions
-
-  # VpcPeering:
-  #   Condition: CreateVpcPeering
-  #   Value: !Ref VpcPeering
-  #   Export:
-  #     Name: MgmtVpcPeering
-
-  # SecGrpDefaultAccess:
-  #   Condition: CreateTGWAttachement
-  #   Value: !Ref SecGrpDefaultAccess
-  #   Export:
-  #     Name: DefaultAccess
-      
-  # S3Endpoint:
-  #   Condition: CreateS3EndPoint
-  #   Value: !Ref S3Endpoint
-  #   Export:
-  #     Name: S3Endpoint
