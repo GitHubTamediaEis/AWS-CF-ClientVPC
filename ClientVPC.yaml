@@ -47,18 +47,13 @@ Metadata:
         Parameters:
           - VpcSize
           - ValidationToken
-      - Label: { default: Connect to corporate shared services }
+      - Label: { default: Central Services }
         Parameters:
           - ConnectToCentralRouter
-      # - Label: { default: Az1 network setup }
-      #   Parameters:
-      #     - Zone1
-      # - Label: { default: Az2 network setup }
-      #   Parameters:
-      #     - Zone2
-      # - Label: { default: Az3 network setup }
-      #   Parameters:
-      #     - Zone3
+          - UseMediaItDomainServices
+      - Label: { default: Customized implementations }
+        Parameters:
+          - CustomImplementationTag
 
     ParameterLabels:
       VpcSize:
@@ -66,13 +61,11 @@ Metadata:
       ValidationToken:
         default: Token for M, L and XL sized VPC
       ConnectToCentralRouter:
-        default: Enable access to corporate shared services
-      # Zone1:
-      #   default: First AZ
-      # Zone2:
-      #   default: Second AZ
-      # Zone3:
-      #   default: Third AZ
+        default: Connect to central router (Transit Gateway)
+      UseMediaItDomainServices:
+        default: Access to MediaIT services 
+      CustomImplementationTag:
+        default: Customized implemetation Tag
 
 Conditions:
   CreateTGWAttachement: !Equals [ !Ref ConnectToCentralRouter, "yes" ]
