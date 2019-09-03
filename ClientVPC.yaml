@@ -17,19 +17,19 @@ Parameters:
     Type: String
     Description: "If you select a VPC size other than S, you need to request a token from Network Services first (network@tamedia.ch) providing the following details: Requirement for bigger VPC, the region to deploy in, your account ID and the desired VPC size."
 
-  ConnectToCorpSharedServices:
+  ConnectToCentralRouter:
     Type: String
     Default: "yes"
-    Description: "Do you need access to Tamedia Corp shared services and VPN? (yes/NO)"
+    Description: "Do you need access to other accounts, Corp shared services or VPN connections? (YES/no)"
     AllowedValues: 
       - "yes"
       - "no"
     ConstraintDescription: Value must be either "yes" or "no".
 
-  UseMediaItDnsResolver:
+  UseMediaItDomainServices:
     Type: String
     Default: "no"
-    Description: Use mediait.ch domain services (NO/yes) 
+    Description: Do you need access to mediait.ch domain services (NO/yes) 
     AllowedValues: 
       - "yes"
       - "no"
@@ -49,7 +49,7 @@ Metadata:
           - ValidationToken
       - Label: { default: Connect to corporate shared services }
         Parameters:
-          - ConnectToCorpSharedServices
+          - ConnectToCentralRouter
       # - Label: { default: Az1 network setup }
       #   Parameters:
       #     - Zone1
@@ -65,7 +65,7 @@ Metadata:
         default: Size of the VPC
       ValidationToken:
         default: Token for M, L and XL sized VPC
-      ConnectToCorpSharedServices:
+      ConnectToCentralRouter:
         default: Enable access to corporate shared services
       # Zone1:
       #   default: First AZ
@@ -75,9 +75,9 @@ Metadata:
       #   default: Third AZ
 
 Conditions:
-  CreateTGWAttachement: !Equals [ !Ref ConnectToCorpSharedServices, "yes" ]
+  CreateTGWAttachement: !Equals [ !Ref ConnectToCentralRouter, "yes" ]
   CreateIntraVpc: !Not [ !Equals [ !Ref VpcSize, "S" ] ]
-  AssociateMediaItDnsResolver: !Equals [ !Ref UseMediaItDnsResolver, "yes" ]
+  AssociateMediaItDnsResolver: !Equals [ !Ref UseMediaItDomainServices, "yes" ]
 
 Mappings: 
   RegionMap: 
