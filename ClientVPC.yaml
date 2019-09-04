@@ -88,7 +88,7 @@ Mappings:
       "Az2": "eu-central-1b"
       "Az3": "eu-central-1c"
       "ClientAttachmentSNSARN": "arn:aws:sns:eu-central-1:733626620836:ClientAttachmentCustomResource"
-      "MediaItResolverRuleId": None
+      "MediaItResolverRuleId": "Sorry, mediait.ch resolution is currently not available in region eu-central-1."
 
 
 Resources:
