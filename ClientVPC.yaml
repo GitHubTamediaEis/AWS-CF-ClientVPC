@@ -263,46 +263,12 @@ Resources:
   TGWattachementCustomResource:
     Type: Custom::NewTGWAttachement
     Condition: CreateTGWAttachement
-#    DependsOn: NatGateway
-#    DependsOn: AttachmentToTransitGateway
     Properties: 
       ServiceToken: !FindInMap [RegionMap, !Ref "AWS::Region", ClientAttachmentSNSARN]
       # Region: !Ref "AWS::Region"
       TransitGatewayAttachmentId: !Ref AttachmentToTransitGateway
       CustomImplementationTag: !Ref CustomImplementationTag
       VpcCidrBlock: !GetAtt VpcIpAddressesCustomResource.outputVpcCidrBlock
-
-  # VpnGateway:
-  #   Type: AWS::EC2::VPNGateway
-  #   Condition: CreateVpn
-  #   Properties:
-  #     Type: ipsec.1
-  #     Tags:
-  #       - Key: Name
-  #         Value: SC-VPC-VpnGateway
-
-  # CustomerVpnGateway:  
-  #   Type: "AWS::EC2::CustomerGateway"
-  #   Condition: CreateCustomerGateway
-  #   Properties:
-  #     BgpAsn: 65000
-  #     IpAddress: !Ref CustomerGatewayAddress
-  #     Type: ipsec.1
-  #     Tags:
-  #       - Key: Name
-  #         Value: SC-VPC-CustomerGateway
-
-  # VpnConnection:
-  #   Type: AWS::EC2::VPNConnection
-  #   Condition: CreateVpn
-  #   Properties:
-  #     Type: ipsec.1
-  #     StaticRoutesOnly: true
-  #     VpnGatewayId: !Ref VpnGateway
-  #     CustomerGatewayId: !If [CreateCustomerGateway, !Ref CustomerVpnGateway, !Ref CustomerGatewayId]
-  #     Tags:
-  #       - Key: Name
-  #         Value: SC-VPC-VpnConnection
 
   # VpnConnectionRoute:
   #   Type: AWS::EC2::VPNConnectionRoute
@@ -367,40 +333,13 @@ Resources:
 
   NatGateway:
     Type: AWS::EC2::NatGateway
+    DependsOn: InternetGateway
     Properties:
       AllocationId: !GetAtt NatGatewayEip.AllocationId
       SubnetId: !Ref PublicSubnet1
       Tags:
         - Key: Name
           Value: SC-VPC-NatGateway
-
-  # DhcpOptions:
-  #   Type: AWS::EC2::DHCPOptions
-  #   Condition: DefineCustomDNSParameters
-  #   Properties:
-  #     DomainName: !Ref DnsDomainName
-  #     DomainNameServers: !Ref DnsServers
-  #     NtpServers: !Ref NtpServers
-  #     Tags:
-  #       - Key: Name
-  #         Value: SC-VPC-DhcpOptions
-
-  # AttachDhcpOptions:
-  #   Type: AWS::EC2::VPCDHCPOptionsAssociation
-  #   Condition: DefineCustomDNSParameters
-  #   Properties: 
-  #     DhcpOptionsId: !Ref DhcpOptions
-  #     VpcId: !Ref Vpc
-
-  # VpcPeering:
-  #   Type: "AWS::EC2::VPCPeeringConnection"
-  #   Condition: CreateVpcPeering
-  #   Properties: 
-  #     PeerVpcId: !Ref PeerVpc
-  #     VpcId: !Ref Vpc
-  #     Tags:
-  #       - Key: Name
-  #         Value: SC-VPC-MgmtVpcPeering
 
 # Setup a public route table
 
@@ -434,23 +373,6 @@ Resources:
           Value: SC-VPC-IntraVpc
 
 # Add routes for public subnets
-
-  # PeeringRoutePublic:
-  #   Type: AWS::EC2::Route
-  #   Condition: CreateVpcPeering
-  #   Properties:
-  #     RouteTableId: !Ref RouteTablePublic
-  #     DestinationCidrBlock: !Ref PeerVpcCidr
-  #     VpcPeeringConnectionId: !Ref VpcPeering      
-
-  # PeeringRoutePublicPeerVpc:
-  #   Type: AWS::EC2::Route
-  #   Condition: CreateVpcPeering
-  #   Properties:
-  #     RouteTableId: !Ref PeerVpcPublicRouteTable
-  #     DestinationCidrBlock:
-  #       !GetAtt VpcIpAddressesCustomResource.outputVpcCidrBlock
-  #     VpcPeeringConnectionId: !Ref VpcPeering
 
   InternetRoutePublic:
     Type: AWS::EC2::Route
@@ -495,60 +417,6 @@ Resources:
       RouteTableId: !Ref RouteTablePublic
       DestinationCidrBlock: 192.168.0.0/16
       TransitGatewayId: !FindInMap [RegionMap, !Ref "AWS::Region", TransitGatewayId]
-
-  # VpnRoutePublicSubnet2:
-  #   Type: AWS::EC2::Route
-  #   DependsOn: AttachVpnGateway
-  #   Condition: CreateVpn
-  #   Properties:
-  #     RouteTableId: !Ref RouteTablePublic
-  #     DestinationCidrBlock: 10.30.0.0/16
-  #     GatewayId: !Ref VpnGateway
-
-  # VpnRoutePublicSubnet3:
-  #   Type: AWS::EC2::Route
-  #   DependsOn: AttachVpnGateway
-  #   Condition: CreateVpn
-  #   Properties:
-  #     RouteTableId: !Ref RouteTablePublic
-  #     DestinationCidrBlock: 10.24.0.0/16
-  #     GatewayId: !Ref VpnGateway         
-
-  # VpnRoutePublic4:
-  #   Type: AWS::EC2::Route
-  #   DependsOn: AttachVpnGateway
-  #   Condition: CreateVpn
-  #   Properties:
-  #     RouteTableId: !Ref RouteTablePublic
-  #     DestinationCidrBlock: 10.0.240.0/23
-  #     GatewayId: !Ref VpnGateway
-
-  # VpnRoutePublic5:
-  #   Type: AWS::EC2::Route
-  #   DependsOn: AttachVpnGateway
-  #   Condition: CreateVpn
-  #   Properties:
-  #     RouteTableId: !Ref RouteTablePublic
-  #     DestinationCidrBlock: 10.0.249.0/24
-  #     GatewayId: !Ref VpnGateway
-
-  # VpnRoutePublic6:
-  #   Type: AWS::EC2::Route
-  #   DependsOn: AttachVpnGateway
-  #   Condition: CreateVpn
-  #   Properties:
-  #     RouteTableId: !Ref RouteTablePublic
-  #     DestinationCidrBlock: 10.0.250.0/24
-  #     GatewayId: !Ref VpnGateway
-
-  # VpnRoutePublic7:
-  #   Type: AWS::EC2::Route
-  #   DependsOn: AttachVpnGateway
-  #   Condition: CreateVpn
-  #   Properties:
-  #     RouteTableId: !Ref RouteTablePublic
-  #     DestinationCidrBlock: 10.100.4.0/22
-  #     GatewayId: !Ref VpnGateway
 
   DmzRoutePublic:
     Type: AWS::EC2::Route
@@ -596,94 +464,6 @@ Resources:
       DestinationCidrBlock: 192.168.0.0/16
       TransitGatewayId: !FindInMap [RegionMap, !Ref "AWS::Region", TransitGatewayId]
       
-  # PeeringRoutePrivate:
-  #   Type: AWS::EC2::Route
-  #   Condition: CreateVpcPeering
-  #   Properties:
-  #     RouteTableId: !Ref RouteTablePrivate
-  #     DestinationCidrBlock: !Ref PeerVpcCidr
-  #     VpcPeeringConnectionId: !Ref VpcPeering 
-
-  # PeeringRoutePrivatePeerVpc:
-  #   Type: AWS::EC2::Route
-  #   Condition: CreateVpcPeering
-  #   Properties:
-  #     RouteTableId: !Ref PeerVpcPrivateRouteTable
-  #     DestinationCidrBlock:
-  #       !GetAtt VpcIpAddressesCustomResource.outputVpcCidrBlock
-  #     VpcPeeringConnectionId: !Ref VpcPeering      
-
-  # VpnRoutePrivate:
-  #   Type: AWS::EC2::Route
-  #   DependsOn: AttachVpnGateway
-  #   Condition: CreateVpn
-  #   Properties:
-  #     RouteTableId: !Ref RouteTablePrivate
-  #     DestinationCidrBlock: 145.234.0.0/16
-  #     GatewayId: !Ref VpnGateway
-
-  # VpnRoutePrivateSubnet2:
-  #   Type: AWS::EC2::Route
-  #   DependsOn: AttachVpnGateway
-  #   Condition: CreateVpn
-  #   Properties:
-  #     RouteTableId: !Ref RouteTablePrivate
-  #     DestinationCidrBlock: 10.30.0.0/16
-  #     GatewayId: !Ref VpnGateway      
-
-  # VpnRoutePrivateSubnet3:
-  #   Type: AWS::EC2::Route
-  #   DependsOn: AttachVpnGateway
-  #   Condition: CreateVpn
-  #   Properties:
-  #     RouteTableId: !Ref RouteTablePrivate
-  #     DestinationCidrBlock: 10.24.0.0/16
-  #     GatewayId: !Ref VpnGateway         
-
-  # VpnRoutePrivate4:
-  #   Type: AWS::EC2::Route
-  #   DependsOn: AttachVpnGateway
-  #   Condition: CreateVpn
-  #   Properties:
-  #     RouteTableId: !Ref RouteTablePrivate
-  #     DestinationCidrBlock: 10.0.240.0/23
-  #     GatewayId: !Ref VpnGateway
-
-  # VpnRoutePrivate5:
-  #   Type: AWS::EC2::Route
-  #   DependsOn: AttachVpnGateway
-  #   Condition: CreateVpn
-  #   Properties:
-  #     RouteTableId: !Ref RouteTablePrivate
-  #     DestinationCidrBlock: 10.0.249.0/24
-  #     GatewayId: !Ref VpnGateway
-
-  # VpnRoutePrivate6:
-  #   Type: AWS::EC2::Route
-  #   DependsOn: AttachVpnGateway
-  #   Condition: CreateVpn
-  #   Properties:
-  #     RouteTableId: !Ref RouteTablePrivate
-  #     DestinationCidrBlock: 10.0.250.0/24
-  #     GatewayId: !Ref VpnGateway
-
-  # VpnRoutePrivate7:
-  #   Type: AWS::EC2::Route
-  #   DependsOn: AttachVpnGateway
-  #   Condition: CreateVpn
-  #   Properties:
-  #     RouteTableId: !Ref RouteTablePrivate
-  #     DestinationCidrBlock: 10.100.4.0/22
-  #     GatewayId: !Ref VpnGateway
-
-  # DmzRoutePrivateSubnet1: # Exception for RAS-TAM DMZ to be routed via VPN
-  #   Type: AWS::EC2::Route
-  #   DependsOn: AttachVpnGateway
-  #   Condition: CreateVpn
-  #   Properties:
-  #     RouteTableId: !Ref RouteTablePrivate
-  #     DestinationCidrBlock: 145.234.241.0/27
-  #     GatewayId: !Ref VpnGateway
 
   DmzRoutePrivate:
     Type: AWS::EC2::Route
