@@ -270,62 +270,6 @@ Resources:
       CustomImplementationTag: !Ref CustomImplementationTag
       VpcCidrBlock: !GetAtt VpcIpAddressesCustomResource.outputVpcCidrBlock
 
-  # VpnConnectionRoute:
-  #   Type: AWS::EC2::VPNConnectionRoute
-  #   Condition: CreateVpn
-  #   Properties:
-  #     VpnConnectionId: !Ref VpnConnection
-  #     DestinationCidrBlock: 145.234.0.0/16
-
-  # VpnConnectionRoute2:
-  #   Type: AWS::EC2::VPNConnectionRoute
-  #   Condition: CreateVpn
-  #   Properties:
-  #     VpnConnectionId: !Ref VpnConnection
-  #     DestinationCidrBlock: 10.30.0.0/16
-
-  # VpnConnectionRoute3:
-  #   Type: AWS::EC2::VPNConnectionRoute
-  #   Condition: CreateVpn
-  #   Properties:
-  #     VpnConnectionId: !Ref VpnConnection
-  #     DestinationCidrBlock: 10.24.0.0/16     
-
-  # VpnConnectionRoute4:
-  #     Type: AWS::EC2::VPNConnectionRoute
-  #     Condition: CreateVpn
-  #     Properties:
-  #       VpnConnectionId: !Ref VpnConnection
-  #       DestinationCidrBlock: 10.0.240.0/23  
-
-  # VpnConnectionRoute5:
-  #     Type: AWS::EC2::VPNConnectionRoute
-  #     Condition: CreateVpn
-  #     Properties:
-  #       VpnConnectionId: !Ref VpnConnection
-  #       DestinationCidrBlock: 10.0.249.0/24
-
-  # VpnConnectionRoute6:
-  #     Type: AWS::EC2::VPNConnectionRoute
-  #     Condition: CreateVpn
-  #     Properties:
-  #       VpnConnectionId: !Ref VpnConnection
-  #       DestinationCidrBlock: 10.0.250.0/24      
-
-  # VpnConnectionRoute7:
-  #     Type: AWS::EC2::VPNConnectionRoute
-  #     Condition: CreateVpn
-  #     Properties:
-  #       VpnConnectionId: !Ref VpnConnection
-  #       DestinationCidrBlock: 10.100.4.0/22      
-
-  # AttachVpnGateway:
-  #   Type: AWS::EC2::VPCGatewayAttachment
-  #   Condition: CreateVpn
-  #   Properties:
-  #     VpcId: !Ref Vpc
-  #     VpnGatewayId: !Ref VpnGateway
-
   NatGatewayEip:
     Type: AWS::EC2::EIP
     Properties:
@@ -578,135 +522,135 @@ Outputs:
   Vpc:
     Value: !Ref Vpc
     Export:
-      Name: Vpc
+      Name: SC-VPC
       
   VpcCidrBlock:
     Value:
         !GetAtt VpcIpAddressesCustomResource.outputVpcCidrBlock
     Export:
-      Name: Vpc-CidrBlock
+      Name: SC-VPC-CidrBlock
 
   Az1:
     Value: !FindInMap [RegionMap, !Ref "AWS::Region", Az1]
     Export:
-      Name: Az1
+      Name: SC-VPC-Az1
 
   Az2:
     Value: !FindInMap [RegionMap, !Ref "AWS::Region", Az2]
     Export:
-      Name: Az2
+      Name: SC-VPC-Az2
 
   Az3:
     Value: !FindInMap [RegionMap, !Ref "AWS::Region", Az3]
     Export:
-      Name: Az3
+      Name: SC-VPC-Az3
 
   PublicSubnet1:
     Value: !Ref PublicSubnet1
     Export:
-      Name: PublicSubnet1
+      Name: SC-VPC-PublicSubnet1
       
   PublicSubnet1CidrBlock:
     Value:
         !GetAtt VpcIpAddressesCustomResource.outputAz1Public
     Export:
-      Name: PublicSubnet1-CidrBlock
+      Name: SC-VPC-PublicSubnet1-CidrBlock
 
   PublicSubnet2:
     Value: !Ref PublicSubnet2
     Export:
-      Name: PublicSubnet2
+      Name: SC-VPC-PublicSubnet2
       
   PublicSubnet2CidrBlock:
     Value:
         !GetAtt VpcIpAddressesCustomResource.outputAz2Public
     Export:
-      Name: PublicSubnet2-CidrBlock
+      Name: SC-VPC-PublicSubnet2-CidrBlock
 
   PublicSubnet3:
     Value: !Ref PublicSubnet3
     Export:
-      Name: PublicSubnet3
+      Name: SC-VPC-PublicSubnet3
       
   PublicSubnet3CidrBlock:
     Value:
         !GetAtt VpcIpAddressesCustomResource.outputAz3Public
     Export:
-      Name: PublicSubnet3-CidrBlock
+      Name: SC-VPC-PublicSubnet3-CidrBlock
 
   PrivateSubnet1:
     Value: !Ref PrivateSubnet1
     Export:
-      Name: PrivateSubnet1
+      Name: SC-VPC-PrivateSubnet1
       
   PrivateSubnet1CidrBlock:
     Value:
         !GetAtt VpcIpAddressesCustomResource.outputAz1Private
     Export:
-      Name: PrivateSubnet1-CidrBlock
+      Name: SC-VPC-PrivateSubnet1-CidrBlock
 
   PrivateSubnet2:
     Value: !Ref PrivateSubnet2
     Export:
-      Name: PrivateSubnet2
+      Name: SC-VPC-PrivateSubnet2
       
   PrivateSubnet2CidrBlock:
     Value:
         !GetAtt VpcIpAddressesCustomResource.outputAz2Private
     Export:
-      Name: PrivateSubnet2-CidrBlock
+      Name: SC-VPC-PrivateSubnet2-CidrBlock
       
   PrivateSubnet3:
     Value: !Ref PrivateSubnet3
     Export:
-      Name: PrivateSubnet3
+      Name: SC-VPC-PrivateSubnet3
       
   PrivateSubnet3CidrBlock:
     Value:
         !GetAtt VpcIpAddressesCustomResource.outputAz3Private
     Export:
-      Name: PrivateSubnet3-CidrBlock
+      Name: SC-VPC-PrivateSubnet3-CidrBlock
 
   IntraVpcSubnet1:
     Condition: CreateIntraVpc
     Value: !Ref IntraVpcSubnet1
     Export:
-      Name: IntraVpcSubnet1
+      Name: SC-VPC-IntraVpcSubnet1
       
   IntraVpcSubnet1CidrBlock:
     Condition: CreateIntraVpc
     Value:
         !GetAtt VpcIpAddressesCustomResource.outputAz1IntraVpc
     Export:
-      Name: IntraVpcSubnet1-CidrBlock
+      Name: SC-VPC-IntraVpcSubnet1-CidrBlock
 
   IntraVpcSubnet2:
     Condition: CreateIntraVpc
     Value: !Ref IntraVpcSubnet2
     Export:
-      Name: IntraVpcSubnet2
+      Name: SC-VPC-IntraVpcSubnet2
       
   IntraVpcSubnet2CidrBlock:
     Condition: CreateIntraVpc
     Value:
         !GetAtt VpcIpAddressesCustomResource.outputAz2IntraVpc
     Export:
-      Name: IntraVpcSubnet2-CidrBlock
+      Name: SC-VPC-IntraVpcSubnet2-CidrBlock
       
   IntraVpcSubnet3:
     Condition: CreateIntraVpc
     Value: !Ref IntraVpcSubnet3
     Export:
-      Name: IntraVpcSubnet3
+      Name: SC-VPC-IntraVpcSubnet3
       
   IntraVpcSubnet3CidrBlock:
     Condition: CreateIntraVpc
     Value:
-        !GetAtt VpcIpAddressesCustomResource.outputAz3IntraVpc
+        !GetAtt SC-VPC-VpcIpAddressesCustomResource.outputAz3IntraVpc
     Export:
       Name: IntraVpcSubnet3-CidrBlock
 
   NatGatewayEip:
     Value: !Ref NatGatewayEip
     Export:
-      Name: NatGatewayEip
+      Name: SC-VPC-NatGatewayEip
