@@ -648,7 +648,7 @@ Outputs:
     Value:
         !GetAtt VpcIpAddressesCustomResource.outputAz3IntraVpc
     Export:
-      Name: IntraVpcSubnet3-CidrBlock
+      Name: SC-VPC-IntraVpcSubnet3-CidrBlock
 
   NatGatewayEip:
     Value: !Ref NatGatewayEip
