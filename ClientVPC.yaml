@@ -122,6 +122,8 @@ Resources:
       AvailabilityZone: !FindInMap [RegionMap, !Ref "AWS::Region", Az1]
       VpcId: !Ref Vpc
       CidrBlock: !GetAtt VpcIpAddressesCustomResource.outputAz1Public
+      # AssignIpv6AddressOnCreation: true
+      MapPublicIpOnLaunch: true
       Tags:
         - Key: Name
           Value: SC-VPC-PublicSubnet1
@@ -134,6 +136,8 @@ Resources:
       AvailabilityZone: !FindInMap [RegionMap, !Ref "AWS::Region", Az2]
       VpcId: !Ref Vpc
       CidrBlock: !GetAtt VpcIpAddressesCustomResource.outputAz2Public
+      # AssignIpv6AddressOnCreation: true
+      MapPublicIpOnLaunch: true
       Tags:
         - Key: Name
           Value: SC-VPC-PublicSubnet2
@@ -146,6 +150,8 @@ Resources:
       AvailabilityZone: !FindInMap [RegionMap, !Ref "AWS::Region", Az3]
       VpcId: !Ref Vpc
       CidrBlock: !GetAtt VpcIpAddressesCustomResource.outputAz3Public
+      # AssignIpv6AddressOnCreation: true
+      MapPublicIpOnLaunch: true
       Tags:
         - Key: Name
           Value: SC-VPC-PublicSubnet3
