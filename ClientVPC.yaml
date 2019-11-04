@@ -662,7 +662,7 @@ Resources:
                       $localAdminGroup.add('WinNT://'+$_.Value)
                   }
                 - {AdditionalLocalAdmins: !Join [',', !Ref DomainJoinAdministrators], DefaultAdmin: !ImportValue AdministratorAdGroupName}
-          - action: aws:installApplication
+          - action: aws:applications
             name: installLaps
             inputs:
               action: Install
