@@ -592,7 +592,7 @@ Resources:
       Properties:
         DocumentType: Command
         Content:
-          description: Install Cybereason Sensor
+          description: Join the Active Directory
           schemaVersion: '2.2'
           mainSteps:
           - action: aws:runPowerShellScript
