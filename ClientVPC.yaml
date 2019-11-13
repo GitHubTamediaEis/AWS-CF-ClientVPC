@@ -26,45 +26,6 @@ Parameters:
       - "no"
     ConstraintDescription: Value must be either "yes" or "no".
 
-  DomainJoinWindowsMachines:
-    Type: String
-    Default: "no"
-    Description: Do you need to join windows machines to the active directory (mediait.ch) (NO/yes) 
-    AllowedValues: 
-      - "yes"
-      - "no"
-    ConstraintDescription: Value must be either "yes" or "no".
-
-  DomainJoinAdministrators:
-    Type: CommaDelimitedList
-    Default: ""
-    Description: List of active directory groups to add as administrators of the domain joined machines
-
-  DomainJoinTagName:
-    Default: DomainJoin
-    Type: String
-    Description: Tag name of the EC2s to join to the domain
-  
-  DomainJoinTagValues:
-    Default: "yes"
-    Type: CommaDelimitedList
-    Description: Tag values of the EC2s to join to the domain
-  
-  DomainJoinLogBucketName:
-    Type: String
-    Description: Bucket name for domain join association's logs. If nothing is specified a bucket will be created
-    Default: ""
-
-  DomainJoinLogBucketPrefix:
-    Type: String
-    Description: Bucket prefix for domain join association's logs
-    Default: ""
-
-  CustomImplementationTag:
-    Type: String
-    Default: ""
-    Description: Custom ID provided by Tamedia IT for specific implementation, if any
-
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -75,19 +36,6 @@ Metadata:
       - Label: { default: Central Services }
         Parameters:
           - ConnectToCentralRouter
-      - Label: { default: Active Directory }
-        Parameters:
-          - DomainJoinWindowsMachines
-          - DomainJoinAdministrators
-          - DomainJoinTagName
-          - DomainJoinTagValues
-      - Label: { default: Custom implementations }
-        Parameters:
-          - CustomImplementationTag
-      - Label: { default: Logging }
-        Parameters:
-          - DomainJoinLogBucketName
-          - DomainJoinLogBucketPrefix
 
     ParameterLabels:
       VpcSize:
@@ -96,26 +44,10 @@ Metadata:
         default: Token for M, L and XL sized VPC
       ConnectToCentralRouter:
         default: Connect to central router (Transit Gateway)
-      DomainJoinWindowsMachines:
-        default: Domain join
-      DomainJoinAdministrators:
-        default: Administrators
-      DomainJoinTagName:
-        default: Tag name
-      DomainJoinTagValues:
-        default: Tag values
-      DomainJoinLogBucketName:
-        default: Domain join bucket
-      DomainJoinLogBucketPrefix:
-        default: Domain join bucket prefix
-      CustomImplementationTag:
-        default: Tag
 
 Conditions:
   CreateTGWAttachement: !Equals [ !Ref ConnectToCentralRouter, "yes" ]
   CreateIntraVpc: !Not [ !Equals [ !Ref VpcSize, "S" ] ]
-  DomainJoinWindowsMachines: !Equals [ !Ref DomainJoinWindowsMachines, "yes" ]
-  DomainJoinCreateS3Bucket: !And [!Equals [ !Ref DomainJoinLogBucketName, "" ], !Condition DomainJoinWindowsMachines]
 
 Mappings: 
   RegionMap: 
@@ -124,16 +56,12 @@ Mappings:
       "Az1": "eu-west-1a"
       "Az2": "eu-west-1b"
       "Az3": "eu-west-1c"
-      "ClientAttachmentSNSARN": "arn:aws:sns:eu-west-1:733626620836:ClientAttachmentCustomResource"
-      "MediaItResolverRuleId": "rslvr-rr-19d7f32e7a0a41959"
 
     eu-central-1: 
       "TransitGatewayId": "tgw-09b008f794dcaf554"
       "Az1": "eu-central-1a"
       "Az2": "eu-central-1b"
       "Az3": "eu-central-1c"
-      "ClientAttachmentSNSARN": "arn:aws:sns:eu-central-1:733626620836:ClientAttachmentCustomResource"
-      "MediaItResolverRuleId": "Sorry, mediait.ch resolution is currently not available in region eu-central-1."
 
 
 Resources:
@@ -557,134 +485,6 @@ Resources:
     Properties:
       SubnetId: !Ref IntraVpcSubnet3
       RouteTableId: !Ref RouteTableIntraVpc
-
-# Associate mediait.ch DNS reslover rule if needed
-
-  AssociateMediaItResolverRule:
-    Condition: DomainJoinWindowsMachines
-    Type: AWS::Route53Resolver::ResolverRuleAssociation
-    Properties: 
-      Name: MediaItDnsRuleAssociation
-      ResolverRuleId: !FindInMap [RegionMap, !Ref "AWS::Region", MediaItResolverRuleId]
-      VPCId: !Ref Vpc
-
-# Domain join related resources
-
-  AdJoin:
-    Type: Custom::AdJoin
-    Condition: DomainJoinWindowsMachines
-    Properties:
-      ServiceToken: arn:aws:sns:eu-west-1:733626620836:ActiveDirectoryJoin
-
-  DomainJoinLoggingBucket:
-    Type: AWS::S3::Bucket
-    Condition: DomainJoinCreateS3Bucket
-    Properties:
-      BucketName: !Sub domainjoin-logging-${AWS::AccountId}
-      LifecycleConfiguration:
-        Rules: 
-        - ExpirationInDays: 90
-          Status: Enabled
-  
-  DomainJoinDocument:
-      Type: AWS::SSM::Document
-      Condition: DomainJoinWindowsMachines
-      Properties:
-        DocumentType: Command
-        Content:
-          description: Join the Active Directory
-          schemaVersion: '2.2'
-          mainSteps:
-          - action: aws:runPowerShellScript
-            name: domainJoin
-            precondition:
-              StringEquals:
-              - platformType
-              - Windows
-            inputs:
-              runCommand:
-              - !Sub |
-                  if((Get-WmiObject 'Win32_ComputerSystem').PartOfDomain){
-                    return
-                  }
-                  # Retrieve configuration values
-                  $ou = '${AdJoin.OrganizationalUnit}'
-                  $username = '${AdJoin.UserName}'
-                  $password = '${AdJoin.Password}' | ConvertTo-SecureString -AsPlainText -Force
-                  $domainName = $username.split('@')[1]
-                  # Create a System.Management.Automation.PSCredential object
-                  $credential = New-Object System.Management.Automation.PSCredential($username, $password)
-                  # Join the domain and reboot
-                  Add-Computer -DomainName $domainName -OUPath $ou -Credential $credential
-                  # https://docs.aws.amazon.com/systems-manager/latest/userguide/send-commands-reboot.html
-                  exit 3010
-          - action: aws:runPowerShellScript
-            name: addLocalAdmins
-            precondition:
-              StringEquals:
-              - platformType
-              - Windows
-            inputs:
-              runCommand:
-              - !Sub
-                - |
-                  # Retrieve needed value
-                  $additionalAdmins='${AdditionalLocalAdmins}'
-                  $defaultAdmin='${DefaultAdmin}'
-                  $userName='${AdJoin.UserName}'
-                  $password='${AdJoin.Password}'
-                  $domainName=$userName.split('@')[1]
-                  # Connect using credentials, as the SSM service runs in local system context it is not allowed to browse AD
-                  $domain = New-Object -TypeName System.DirectoryServices.DirectoryEntry("LDAP://$domainName",$userName,$password)
-                  $searcher = New-Object -TypeName System.DirectoryServices.DirectorySearcher
-                  $searcher.SearchRoot = $Domain
-                  # Build up the list of admins SID to add
-                  $newAdmins=@($defaultAdmin)
-                  if($additionalAdmins){
-                      $newAdmins += $additionalAdmins[0].Value -split ',' | % {$_.Trim()}
-                  }
-                  $localAdminGroup = [ADSI]"WinNT://$env:COMPUTERNAME/administrators,group"
-                  $currentAdmins=$localAdminGroup.Invoke('Members') | % { New-Object System.Security.Principal.SecurityIdentifier($_.GetType().InvokeMember('objectsid', 'GetProperty', $null, $_, $null),0)}
-                  # Get the current local admins
-                  $newAdminsSid=$newAdmins | % {
-                      $searcher.Filter = "(&(objectCategory=Group)(CN=$_))"
-                      if($group=$searcher.FindOne()){
-                          $binarySID=$group.GetDirectoryEntry().objectsid.Value
-                          New-Object System.Security.Principal.SecurityIdentifier($binarySID,0)
-                      }
-                      else{
-                          Write-Warning "$_ could not be found in the AD"
-                      }
-                  }
-                  # Compare and add the missing ones
-                  $diff=Compare-Object $currentAdmins $newAdminsSid -Property Value
-                  $diff | ? {$_.SideIndicator -eq '=>'} | % {
-                      $localAdminGroup.add('WinNT://'+$_.Value)
-                  }
-                - {AdditionalLocalAdmins: !Join [',', !Ref DomainJoinAdministrators], DefaultAdmin: !ImportValue AdministratorAdGroupName}
-          - action: aws:applications
-            name: installLaps
-            inputs:
-              action: Install
-              source: https://download.microsoft.com/download/C/7/A/C7AAD914-A8A6-4904-88A1-29E657445D03/LAPS.x64.msi
-
-  DomainJoinAssociation:
-    Type: AWS::SSM::Association
-    Condition: DomainJoinWindowsMachines
-    Properties:
-      OutputLocation:
-        S3Location:
-          OutputS3BucketName:
-            !If
-            - DomainJoinCreateS3Bucket
-            - !Ref DomainJoinLoggingBucket
-            - !Ref DomainJoinLogBucketName
-          OutputS3KeyPrefix: !Ref DomainJoinLogBucketPrefix
-      ScheduleExpression: rate(2 hours)
-      Name: !Ref DomainJoinDocument
-      Targets:
-      - Key: !Sub tag:${DomainJoinTagName}
-        Values: !Ref DomainJoinTagValues
 
 Outputs:
 
