@@ -66,12 +66,15 @@ Mappings:
       "Az1": "eu-west-1a"
       "Az2": "eu-west-1b"
       "Az3": "eu-west-1c"
+      "ClientAttachmentSNSARN": "arn:aws:sns:eu-west-1:733626620836:ClientAttachmentCustomResource"
+
 
     eu-central-1: 
       "TransitGatewayId": "tgw-09b008f794dcaf554"
       "Az1": "eu-central-1a"
       "Az2": "eu-central-1b"
       "Az3": "eu-central-1c"
+      "ClientAttachmentSNSARN": "arn:aws:sns:eu-central-1:733626620836:ClientAttachmentCustomResource"
 
 
 Resources:
