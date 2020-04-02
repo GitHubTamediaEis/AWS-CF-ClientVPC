@@ -12,10 +12,14 @@ Parameters:
       - "M"
       - "L"
       - "XL"
+      - "S2"
+      - "M2"
+      - "L2"
+      - "XL2"      
      
   ValidationToken:
     Type: String
-    Description: "If you select a VPC size other than S, you need to request a token from Network Services first (network@tamedia.ch) providing the following details: Requirement for bigger VPC, the region to deploy in, your account ID and the desired VPC size."
+    Description: "If you select a VPC size other than S or S2, you need to request a token from Network Services first (network@tamedia.ch) providing the following details: Requirement for bigger VPCs (the number of needed IP addresses), the region to deploy in, your account ID and the desired VPC size."
 
   ConnectToCentralRouter:
     Type: String
@@ -25,11 +29,20 @@ Parameters:
       - "yes"
       - "no"
     ConstraintDescription: Value must be either "yes" or "no".
-  
+
+  UseMediaItDomainServices:
+    Type: String
+    Default: "no"
+    Description: Do you need access to mediait.ch domain services (NO/yes) 
+    AllowedValues: 
+      - "yes"
+      - "no"
+    ConstraintDescription: Value must be either "yes" or "no".
+
   CustomImplementationTag:
     Type: String
     Default: ""
-    Description: Custom ID provided by Tamedia IT for specific implementation, if any
+    Description: "Custom ID provided by Tamedia IT for specific implementation, if any"
 
 Metadata:
   AWS::CloudFormation::Interface:
@@ -41,7 +54,8 @@ Metadata:
       - Label: { default: Central Services }
         Parameters:
           - ConnectToCentralRouter
-      - Label: { default: Custom implementations }
+          - UseMediaItDomainServices
+      - Label: { default: Customized implementations }
         Parameters:
           - CustomImplementationTag
 
@@ -52,12 +66,18 @@ Metadata:
         default: Token for M, L and XL sized VPC
       ConnectToCentralRouter:
         default: Connect to central router (Transit Gateway)
+      UseMediaItDomainServices:
+        default: Access to MediaIT services 
+      # EnableIPv6:
+        # default: IPv6 addressing on public subnets
       CustomImplementationTag:
-        default: Tag
+        default: Customized implemetation Tag
 
 Conditions:
   CreateTGWAttachement: !Equals [ !Ref ConnectToCentralRouter, "yes" ]
-  CreateIntraVpc: !Not [ !Equals [ !Ref VpcSize, "S" ] ]
+  CreateIntraVpc: !Not [ !Or [ !Equals [ !Ref VpcSize, "S"  ], !Equals [ !Ref VpcSize, "S2" ] ] ] 
+  AssociateMediaItDnsResolver: !Equals [ !Ref UseMediaItDomainServices, "yes" ]
+  # IPv6Condition: !Equals [ !Ref EnableIPv6, "yes" ]
 
 Mappings: 
   RegionMap: 
@@ -67,15 +87,7 @@ Mappings:
       "Az2": "eu-west-1b"
       "Az3": "eu-west-1c"
       "ClientAttachmentSNSARN": "arn:aws:sns:eu-west-1:733626620836:ClientAttachmentCustomResource"
-
-
-    eu-central-1: 
-      "TransitGatewayId": "tgw-09b008f794dcaf554"
-      "Az1": "eu-central-1a"
-      "Az2": "eu-central-1b"
-      "Az3": "eu-central-1c"
-      "ClientAttachmentSNSARN": "arn:aws:sns:eu-central-1:733626620836:ClientAttachmentCustomResource"
-
+      "MediaItResolverRuleId": "rslvr-rr-19d7f32e7a0a41959"
 
 Resources:
 
@@ -84,7 +96,7 @@ Resources:
   VpcIpAddressesCustomResource:
     Type: Custom::VpcIpAddresses
     Properties: 
-      ServiceToken: !Sub arn:aws:sns:${AWS::Region}:733626620836:VpcIpAddressesCustomResource
+      ServiceToken: !Sub arn:aws:sns:${AWS::Region}:733626620836:VpcIpAddressesDevCustomResource
       VpcSize: !Ref VpcSize
       Token: !Ref ValidationToken
 
@@ -498,6 +510,16 @@ Resources:
     Properties:
       SubnetId: !Ref IntraVpcSubnet3
       RouteTableId: !Ref RouteTableIntraVpc
+
+# Associate mediait.ch DNS reslover rule if needed
+
+  AssociateMediaItResolverRule:
+    Condition: AssociateMediaItDnsResolver
+    Type: AWS::Route53Resolver::ResolverRuleAssociation
+    Properties: 
+      Name: MediaItDnsRuleAssociation
+      ResolverRuleId: !FindInMap [RegionMap, !Ref "AWS::Region", MediaItResolverRuleId]
+      VPCId: !Ref Vpc
 
 Outputs:
 
