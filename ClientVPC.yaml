@@ -190,7 +190,7 @@ Resources:
         - Key: Name
           Value: SC-VPC-PrivateSubnet3
 
-# Setup the primary private subnet
+# Setup the primary intra subnet
 
   IntraVpcSubnet1:
     Type: AWS::EC2::Subnet
@@ -203,7 +203,7 @@ Resources:
         - Key: Name
           Value: SC-VPC-IntraVpcSubnet1
 
-# Setup the secondary private subnet
+# Setup the secondary intra subnet
 
   IntraVpcSubnet2:
     Type: AWS::EC2::Subnet
@@ -216,7 +216,7 @@ Resources:
         - Key: Name
           Value: SC-VPC-IntraVpcSubnet2
 
-# Setup the third private subnet
+# Setup the third intra subnet
 
   IntraVpcSubnet3:
     Type: AWS::EC2::Subnet
