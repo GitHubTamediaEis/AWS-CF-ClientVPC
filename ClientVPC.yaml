@@ -686,16 +686,10 @@ Resources:
 # Setup S3 VPC Endpoint if required
                   
   S3Endpoint:
-    Type: AWS::EC2::VpcEndpoint
+    Type: AWS::EC2::VPCEndpoint
     Condition: CreateS3VpcEndpoint
     Properties:    
-      RouteTableIds: !If [ CreatePerAzNatGateways , [!Ref RouteTablePrivate, !Ref RouteTablePrivate2, !Ref RouteTablePrivate3], !Ref RouteTablePrivate ]
-# TODO: check proposed syntax to set to the following if condition CreatePerAzNatGateways is true:
-#        - !Ref RouteTablePrivate
-#        - !Ref RouteTablePrivate2
-#        - !Ref RouteTablePrivate3
-#       ip place of: 
-#        - !Ref RouteTablePrivate
+      RouteTableIds: !If [ CreatePerAzNatGateways , [!Ref RouteTablePrivate, !Ref RouteTablePrivate2, !Ref RouteTablePrivate3], [!Ref RouteTablePrivate] ]
       ServiceName: !Sub com.amazonaws.${AWS::Region}.s3
       VpcId: !Ref Vpc
 
