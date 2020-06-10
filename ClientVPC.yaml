@@ -97,6 +97,7 @@ Conditions:
   CreateTGWAttachement: !Equals [ !Ref ConnectToCentralRouter, "yes" ]
   CreateIntraVpc: !Not [ !Equals [ !Ref VpcSize, "S" ] ]
   CreatePerAzNatGateways: !Equals [ !Ref PerAzNatGateways, "yes" ]
+  CreateTGWAttachementAndPerAzNatGateways: !And [ !Equals [ !Ref ConnectToCentralRouter, "yes" ], !Equals [ !Ref PerAzNatGateways, "yes" ] ]
   CreateIntraVpcPerAzNatGatewaysRoutes: !And [ !Not [ !Equals [ !Ref VpcSize, "S" ] ], !Equals [ !Ref PerAzNatGateways, "yes" ] ]
   CreateS3VpcEndpoint: !Equals [ !Ref UseS3VpcEndpoint, "yes" ]
   AssociateMediaItDnsResolver: !Equals [ !Ref UseMediaItDomainServices, "yes" ]
@@ -542,6 +543,44 @@ Resources:
       NatGatewayId: !Ref NatGateway
 
 # Extra routes when implementing HA NAT getways
+# Add routes for private subnets
+
+  RoutePrivate2TGW1:
+    Type: AWS::EC2::Route
+    Condition: CreateTGWAttachementAndPerAzNatGateways
+    DependsOn: AttachmentToTransitGateway
+    Properties:
+      RouteTableId: !Ref RouteTablePrivate2
+      DestinationCidrBlock: 145.234.0.0/16
+      TransitGatewayId: !FindInMap [RegionMap, !Ref "AWS::Region", TransitGatewayId]
+
+  RoutePrivate2TGW2:
+    Type: AWS::EC2::Route
+    Condition: CreateTGWAttachementAndPerAzNatGateways
+    DependsOn: AttachmentToTransitGateway
+    Properties:
+      RouteTableId: !Ref RouteTablePrivate2
+      DestinationCidrBlock: 10.0.0.0/8
+      TransitGatewayId: !FindInMap [RegionMap, !Ref "AWS::Region", TransitGatewayId]
+
+  RoutePrivate2TGW3:
+    Type: AWS::EC2::Route
+    Condition: CreateTGWAttachementAndPerAzNatGateways
+    DependsOn: AttachmentToTransitGateway
+    Properties:
+      RouteTableId: !Ref RouteTablePrivate2
+      DestinationCidrBlock: 172.16.0.0/12
+      TransitGatewayId: !FindInMap [RegionMap, !Ref "AWS::Region", TransitGatewayId]
+
+  RoutePrivate2TGW4:
+    Type: AWS::EC2::Route
+    Condition: CreateTGWAttachementAndPerAzNatGateways
+    DependsOn: AttachmentToTransitGateway
+    Properties:
+      RouteTableId: !Ref RouteTablePrivate2
+      DestinationCidrBlock: 192.168.0.0/16
+      TransitGatewayId: !FindInMap [RegionMap, !Ref "AWS::Region", TransitGatewayId]
+      
 
   DmzRoutePrivate2:
     Type: AWS::EC2::Route
@@ -567,6 +606,43 @@ Resources:
       RouteTableId: !Ref RouteTableIntraVpc2
       DestinationCidrBlock: 0.0.0.0/0
       NatGatewayId: !Ref NatGateway2
+
+  RoutePrivate3TGW1:
+    Type: AWS::EC2::Route
+    Condition: CreateTGWAttachementAndPerAzNatGateways
+    DependsOn: AttachmentToTransitGateway
+    Properties:
+      RouteTableId: !Ref RouteTablePrivate3
+      DestinationCidrBlock: 145.234.0.0/16
+      TransitGatewayId: !FindInMap [RegionMap, !Ref "AWS::Region", TransitGatewayId]
+
+  RoutePrivate3TGW2:
+    Type: AWS::EC2::Route
+    Condition: CreateTGWAttachementAndPerAzNatGateways
+    DependsOn: AttachmentToTransitGateway
+    Properties:
+      RouteTableId: !Ref RouteTablePrivate3
+      DestinationCidrBlock: 10.0.0.0/8
+      TransitGatewayId: !FindInMap [RegionMap, !Ref "AWS::Region", TransitGatewayId]
+
+  RoutePrivate3TGW3:
+    Type: AWS::EC2::Route
+    Condition: CreateTGWAttachementAndPerAzNatGateways
+    DependsOn: AttachmentToTransitGateway
+    Properties:
+      RouteTableId: !Ref RouteTablePrivate3
+      DestinationCidrBlock: 172.16.0.0/12
+      TransitGatewayId: !FindInMap [RegionMap, !Ref "AWS::Region", TransitGatewayId]
+
+  RoutePrivate3TGW4:
+    Type: AWS::EC2::Route
+    Condition: CreateTGWAttachementAndPerAzNatGateways
+    DependsOn: AttachmentToTransitGateway
+    Properties:
+      RouteTableId: !Ref RouteTablePrivate3
+      DestinationCidrBlock: 192.168.0.0/16
+      TransitGatewayId: !FindInMap [RegionMap, !Ref "AWS::Region", TransitGatewayId]
+      
 
   DmzRoutePrivate3:
     Type: AWS::EC2::Route
@@ -631,7 +707,6 @@ Resources:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       SubnetId: !Ref PrivateSubnet2
-# TODO: Check condition to set to RouteTablePrivate2 if CreatePerAZNatGateways if true   
       RouteTableId: !If [ CreatePerAzNatGateways , !Ref RouteTablePrivate2 , !Ref RouteTablePrivate ]
 
 # Associate the Secondary Private route table to the the third private subnet
@@ -640,7 +715,6 @@ Resources:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       SubnetId: !Ref PrivateSubnet3
-# TODO: Add condition to set to RouteTablePrivate3 if CreatePerAZNatGateways if true   
       RouteTableId: !If [ CreatePerAzNatGateways , !Ref RouteTablePrivate3 , !Ref RouteTablePrivate ]
 
 # Associate the primary IntraVpc route table to the the first private subnet
@@ -659,7 +733,6 @@ Resources:
     Condition: CreateIntraVpc
     Properties:
       SubnetId: !Ref IntraVpcSubnet2
-# TODO: Add condition to set to RouteTableIntraVpc2 if CreateIntraVpcPerAZNatGatewaysRoutes if true   
       RouteTableId: !If [ CreateIntraVpcPerAzNatGatewaysRoutes , !Ref RouteTablePrivate2 , !Ref RouteTablePrivate ]
 
 
@@ -670,7 +743,6 @@ Resources:
     Condition: CreateIntraVpc
     Properties:
       SubnetId: !Ref IntraVpcSubnet3
-# TODO: Add condition to set to RouteTableIntraVpc3 if CreateIntraVpcPerAZNatGatewaysRoutes if true   
       RouteTableId: !If [ CreateIntraVpcPerAzNatGatewaysRoutes , !Ref RouteTablePrivate3 , !Ref RouteTablePrivate ]
 
 # Associate mediait.ch DNS reslover rule if needed
