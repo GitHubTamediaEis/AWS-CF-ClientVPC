@@ -730,7 +730,7 @@ Resources:
     Condition: CreateIntraVpc
     Properties:
       SubnetId: !Ref IntraVpcSubnet2
-      RouteTableId: !If [ CreateIntraVpcPerAzNatGatewaysRoutes , !Ref RouteTablePrivate2 , !Ref RouteTablePrivate ]
+      RouteTableId: !If [ CreateIntraVpcPerAzNatGatewaysRoutes , !Ref RouteTableIntraVpc2 , !Ref RouteTableIntraVpc ]
 
 
 # Associate the Secondary IntraVpc route table to the the third private subnet
@@ -740,7 +740,7 @@ Resources:
     Condition: CreateIntraVpc
     Properties:
       SubnetId: !Ref IntraVpcSubnet3
-      RouteTableId: !If [ CreateIntraVpcPerAzNatGatewaysRoutes , !Ref RouteTablePrivate3 , !Ref RouteTablePrivate ]
+      RouteTableId: !If [ CreateIntraVpcPerAzNatGatewaysRoutes , !Ref RouteTableIntraVpc3 , !Ref RouteTableIntraVpc ]
 
 # Associate mediait.ch DNS reslover rule if needed
 
