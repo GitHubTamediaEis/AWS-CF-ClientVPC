@@ -26,15 +26,6 @@ Parameters:
       - "no"
     ConstraintDescription: Value must be either "yes" or "no".
 
-  UseMediaItDomainServices:
-    Type: String
-    Default: "no"
-    Description: Do you need access to mediait.ch domain services (NO/yes) 
-    AllowedValues: 
-      - "yes"
-      - "no"
-    ConstraintDescription: Value must be either "yes" or "no".
-
   PerAzNatGateways:
     Type: String
     Default: "yes"
@@ -72,7 +63,6 @@ Metadata:
       - Label: { default: Central Services }
         Parameters:
           - ConnectToCentralRouter
-          - UseMediaItDomainServices
       - Label: { default: Customized implementations }
         Parameters:
           - CustomImplementationTag
@@ -88,8 +78,6 @@ Metadata:
         default: S3 VPC Endpoint lower data transfer lower by allowing internal connections to S3
       ConnectToCentralRouter:
         default: Connect to central router (Transit Gateway)
-      UseMediaItDomainServices:
-        default: Access to MediaIT services 
       CustomImplementationTag:
         default: Customized implemetation Tag
 
@@ -100,7 +88,6 @@ Conditions:
   CreateTGWAttachementAndPerAzNatGateways: !And [ !Equals [ !Ref ConnectToCentralRouter, "yes" ], !Equals [ !Ref PerAzNatGateways, "yes" ] ]
   CreateIntraVpcPerAzNatGatewaysRoutes: !And [ !Not [ !Equals [ !Ref VpcSize, "S" ] ], !Equals [ !Ref PerAzNatGateways, "yes" ] ]
   CreateS3VpcEndpoint: !Equals [ !Ref UseS3VpcEndpoint, "yes" ]
-  AssociateMediaItDnsResolver: !Equals [ !Ref UseMediaItDomainServices, "yes" ]
 
 Mappings: 
   RegionMap: 
@@ -110,7 +97,6 @@ Mappings:
       "Az2": "eu-west-1b"
       "Az3": "eu-west-1c"
       "ClientAttachmentSNSARN": "arn:aws:sns:eu-west-1:733626620836:ClientAttachmentCustomResource"
-      "MediaItResolverRuleId": "rslvr-rr-19d7f32e7a0a41959"
 
     eu-central-1: 
       "TransitGatewayId": "tgw-09b008f794dcaf554"
@@ -118,7 +104,6 @@ Mappings:
       "Az2": "eu-central-1b"
       "Az3": "eu-central-1c"
       "ClientAttachmentSNSARN": "arn:aws:sns:eu-central-1:733626620836:ClientAttachmentCustomResource"
-      "MediaItResolverRuleId": "Sorry, mediait.ch resolution is currently not available in region eu-central-1."
 
 
 Resources:
@@ -741,16 +726,6 @@ Resources:
     Properties:
       SubnetId: !Ref IntraVpcSubnet3
       RouteTableId: !If [ CreateIntraVpcPerAzNatGatewaysRoutes , !Ref RouteTableIntraVpc3 , !Ref RouteTableIntraVpc ]
-
-# Associate mediait.ch DNS reslover rule if needed
-
-  AssociateMediaItResolverRule:
-    Condition: AssociateMediaItDnsResolver
-    Type: AWS::Route53Resolver::ResolverRuleAssociation
-    Properties: 
-      Name: MediaItDnsRuleAssociation
-      ResolverRuleId: !FindInMap [RegionMap, !Ref "AWS::Region", MediaItResolverRuleId]
-      VPCId: !Ref Vpc
 
 # Setup S3 VPC Endpoint if required
                   
