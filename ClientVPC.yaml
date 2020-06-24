@@ -47,7 +47,7 @@ Parameters:
   CustomImplementationTag:
     Type: String
     Default: ""
-    Description: "Custom ID provided by Tamedia IT for specific implementation, if any"
+    Description: Custom ID provided by Tamedia IT for specific implementation, if any
 
 Metadata:
   AWS::CloudFormation::Interface:
@@ -79,7 +79,7 @@ Metadata:
       ConnectToCentralRouter:
         default: Connect to central router (Transit Gateway)
       CustomImplementationTag:
-        default: Customized implemetation Tag
+        default: Tag
 
 Conditions:
   CreateTGWAttachement: !Equals [ !Ref ConnectToCentralRouter, "yes" ]
