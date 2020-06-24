@@ -25,7 +25,25 @@ Parameters:
       - "yes"
       - "no"
     ConstraintDescription: Value must be either "yes" or "no".
-  
+
+  PerAzNatGateways:
+    Type: String
+    Default: "yes"
+    Description: Do you need an highly available NAT gateway (no/YES) 
+    AllowedValues: 
+      - "yes"
+      - "no"
+    ConstraintDescription: Value must be either "yes" or "no".
+
+  UseS3VpcEndpoint:
+    Type: String
+    Default: "yes"
+    Description: Do you need a S3 VPC endpoint  (no/YES) 
+    AllowedValues: 
+      - "yes"
+      - "no"
+    ConstraintDescription: Value must be either "yes" or "no".
+
   CustomImplementationTag:
     Type: String
     Default: ""
@@ -38,10 +56,14 @@ Metadata:
         Parameters:
           - VpcSize
           - ValidationToken
+      - Label: { default: AWS Services }
+        Parameters:
+          - PerAzNatGateways    
+          - UseS3VpcEndpoint    
       - Label: { default: Central Services }
         Parameters:
           - ConnectToCentralRouter
-      - Label: { default: Custom implementations }
+      - Label: { default: Customized implementations }
         Parameters:
           - CustomImplementationTag
 
@@ -50,6 +72,10 @@ Metadata:
         default: Size of the VPC
       ValidationToken:
         default: Token for M, L and XL sized VPC
+      PerAzNatGateways:
+        default: One NAT gateway per AZ to get HA
+      UseS3VpcEndpoint:
+        default: S3 VPC Endpoint lower data transfer lower by allowing internal connections to S3
       ConnectToCentralRouter:
         default: Connect to central router (Transit Gateway)
       CustomImplementationTag:
@@ -58,6 +84,10 @@ Metadata:
 Conditions:
   CreateTGWAttachement: !Equals [ !Ref ConnectToCentralRouter, "yes" ]
   CreateIntraVpc: !Not [ !Equals [ !Ref VpcSize, "S" ] ]
+  CreatePerAzNatGateways: !Equals [ !Ref PerAzNatGateways, "yes" ]
+  CreateTGWAttachementAndPerAzNatGateways: !And [ !Equals [ !Ref ConnectToCentralRouter, "yes" ], !Equals [ !Ref PerAzNatGateways, "yes" ] ]
+  CreateIntraVpcPerAzNatGatewaysRoutes: !And [ !Not [ !Equals [ !Ref VpcSize, "S" ] ], !Equals [ !Ref PerAzNatGateways, "yes" ] ]
+  CreateS3VpcEndpoint: !Equals [ !Ref UseS3VpcEndpoint, "yes" ]
 
 Mappings: 
   RegionMap: 
@@ -67,7 +97,6 @@ Mappings:
       "Az2": "eu-west-1b"
       "Az3": "eu-west-1c"
       "ClientAttachmentSNSARN": "arn:aws:sns:eu-west-1:733626620836:ClientAttachmentCustomResource"
-
 
     eu-central-1: 
       "TransitGatewayId": "tgw-09b008f794dcaf554"
@@ -262,7 +291,21 @@ Resources:
       CustomImplementationTag: !Ref CustomImplementationTag
       VpcCidrBlock: !GetAtt VpcIpAddressesCustomResource.outputVpcCidrBlock
 
+# Create NAT gateways
+
   NatGatewayEip:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+
+  NatGatewayEip2:
+    Condition: CreatePerAzNatGateways
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+
+  NatGatewayEip3:
+    Condition: CreatePerAzNatGateways
     Type: AWS::EC2::EIP
     Properties:
       Domain: vpc
@@ -276,6 +319,28 @@ Resources:
       Tags:
         - Key: Name
           Value: SC-VPC-NatGateway
+
+  NatGateway2:
+    Condition: CreatePerAzNatGateways
+    Type: AWS::EC2::NatGateway
+    DependsOn: InternetGateway
+    Properties:
+      AllocationId: !GetAtt NatGatewayEip2.AllocationId
+      SubnetId: !Ref PublicSubnet2
+      Tags:
+        - Key: Name
+          Value: SC-VPC-NatGateway2
+
+  NatGateway3:
+    Condition: CreatePerAzNatGateways
+    Type: AWS::EC2::NatGateway
+    DependsOn: InternetGateway
+    Properties:
+      AllocationId: !GetAtt NatGatewayEip3.AllocationId
+      SubnetId: !Ref PublicSubnet3
+      Tags:
+        - Key: Name
+          Value: SC-VPC-NatGateway3
 
 # Setup a public route table
 
@@ -297,6 +362,26 @@ Resources:
         - Key: Name
           Value: SC-VPC-Private
 
+# Setup the additionnal private route tables for NAT gatway HA if required
+
+  RouteTablePrivate2:
+    Type: AWS::EC2::RouteTable
+    Condition: CreatePerAzNatGateways
+    Properties:
+      VpcId: !Ref Vpc
+      Tags:
+        - Key: Name
+          Value: SC-VPC-Private2
+
+  RouteTablePrivate3:
+    Type: AWS::EC2::RouteTable
+    Condition: CreatePerAzNatGateways
+    Properties:
+      VpcId: !Ref Vpc
+      Tags:
+        - Key: Name
+          Value: SC-VPC-Private3
+
 # Setup the primary intra VPC route table
 
   RouteTableIntraVpc:
@@ -307,6 +392,24 @@ Resources:
       Tags:
         - Key: Name
           Value: SC-VPC-IntraVpc
+
+  RouteTableIntraVpc2:
+    Type: AWS::EC2::RouteTable
+    Condition: CreateIntraVpcPerAzNatGatewaysRoutes
+    Properties:
+      VpcId: !Ref Vpc
+      Tags:
+        - Key: Name
+          Value: SC-VPC-IntraVpc2
+
+  RouteTableIntraVpc3:
+    Type: AWS::EC2::RouteTable
+    Condition: CreateIntraVpcPerAzNatGatewaysRoutes
+    Properties:
+      VpcId: !Ref Vpc
+      Tags:
+        - Key: Name
+          Value: SC-VPC-IntraVpc3
 
 # Add routes for public subnets
 
@@ -408,6 +511,13 @@ Resources:
       DestinationCidrBlock: 145.234.240.0/22
       NatGatewayId: !Ref NatGateway
 
+  NatRoutePrivate:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref RouteTablePrivate
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NatGateway
+
   InternetRouteIntraVpc:
     Type: AWS::EC2::Route
     Condition: CreateIntraVpc
@@ -417,12 +527,129 @@ Resources:
       DestinationCidrBlock: 0.0.0.0/0
       NatGatewayId: !Ref NatGateway
 
-  NatRoutePrivate:
+# Extra routes when implementing HA NAT getways
+
+  RoutePrivate2TGW1:
     Type: AWS::EC2::Route
+    Condition: CreateTGWAttachementAndPerAzNatGateways
+    DependsOn: AttachmentToTransitGateway
     Properties:
-      RouteTableId: !Ref RouteTablePrivate
+      RouteTableId: !Ref RouteTablePrivate2
+      DestinationCidrBlock: 145.234.0.0/16
+      TransitGatewayId: !FindInMap [RegionMap, !Ref "AWS::Region", TransitGatewayId]
+
+  RoutePrivate2TGW2:
+    Type: AWS::EC2::Route
+    Condition: CreateTGWAttachementAndPerAzNatGateways
+    DependsOn: AttachmentToTransitGateway
+    Properties:
+      RouteTableId: !Ref RouteTablePrivate2
+      DestinationCidrBlock: 10.0.0.0/8
+      TransitGatewayId: !FindInMap [RegionMap, !Ref "AWS::Region", TransitGatewayId]
+
+  RoutePrivate2TGW3:
+    Type: AWS::EC2::Route
+    Condition: CreateTGWAttachementAndPerAzNatGateways
+    DependsOn: AttachmentToTransitGateway
+    Properties:
+      RouteTableId: !Ref RouteTablePrivate2
+      DestinationCidrBlock: 172.16.0.0/12
+      TransitGatewayId: !FindInMap [RegionMap, !Ref "AWS::Region", TransitGatewayId]
+
+  RoutePrivate2TGW4:
+    Type: AWS::EC2::Route
+    Condition: CreateTGWAttachementAndPerAzNatGateways
+    DependsOn: AttachmentToTransitGateway
+    Properties:
+      RouteTableId: !Ref RouteTablePrivate2
+      DestinationCidrBlock: 192.168.0.0/16
+      TransitGatewayId: !FindInMap [RegionMap, !Ref "AWS::Region", TransitGatewayId]
+
+  DmzRoutePrivate2:
+    Type: AWS::EC2::Route
+    Condition: CreatePerAzNatGateways
+    Properties:
+      RouteTableId: !Ref RouteTablePrivate2
+      DestinationCidrBlock: 145.234.240.0/22
+      NatGatewayId: !Ref NatGateway2
+
+  NatRoutePrivate2:
+    Type: AWS::EC2::Route
+    Condition: CreatePerAzNatGateways
+    Properties:
+      RouteTableId: !Ref RouteTablePrivate2
       DestinationCidrBlock: 0.0.0.0/0
-      NatGatewayId: !Ref NatGateway
+      NatGatewayId: !Ref NatGateway2
+
+  InternetRouteIntraVpc2:
+    Type: AWS::EC2::Route
+    Condition: CreateIntraVpcPerAzNatGatewaysRoutes
+    DependsOn: AttachGateway
+    Properties:
+      RouteTableId: !Ref RouteTableIntraVpc2
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NatGateway2
+
+  RoutePrivate3TGW1:
+    Type: AWS::EC2::Route
+    Condition: CreateTGWAttachementAndPerAzNatGateways
+    DependsOn: AttachmentToTransitGateway
+    Properties:
+      RouteTableId: !Ref RouteTablePrivate3
+      DestinationCidrBlock: 145.234.0.0/16
+      TransitGatewayId: !FindInMap [RegionMap, !Ref "AWS::Region", TransitGatewayId]
+
+  RoutePrivate3TGW2:
+    Type: AWS::EC2::Route
+    Condition: CreateTGWAttachementAndPerAzNatGateways
+    DependsOn: AttachmentToTransitGateway
+    Properties:
+      RouteTableId: !Ref RouteTablePrivate3
+      DestinationCidrBlock: 10.0.0.0/8
+      TransitGatewayId: !FindInMap [RegionMap, !Ref "AWS::Region", TransitGatewayId]
+
+  RoutePrivate3TGW3:
+    Type: AWS::EC2::Route
+    Condition: CreateTGWAttachementAndPerAzNatGateways
+    DependsOn: AttachmentToTransitGateway
+    Properties:
+      RouteTableId: !Ref RouteTablePrivate3
+      DestinationCidrBlock: 172.16.0.0/12
+      TransitGatewayId: !FindInMap [RegionMap, !Ref "AWS::Region", TransitGatewayId]
+
+  RoutePrivate3TGW4:
+    Type: AWS::EC2::Route
+    Condition: CreateTGWAttachementAndPerAzNatGateways
+    DependsOn: AttachmentToTransitGateway
+    Properties:
+      RouteTableId: !Ref RouteTablePrivate3
+      DestinationCidrBlock: 192.168.0.0/16
+      TransitGatewayId: !FindInMap [RegionMap, !Ref "AWS::Region", TransitGatewayId]
+      
+  DmzRoutePrivate3:
+    Type: AWS::EC2::Route
+    Condition: CreatePerAzNatGateways
+    Properties:
+      RouteTableId: !Ref RouteTablePrivate3
+      DestinationCidrBlock: 145.234.240.0/22
+      NatGatewayId: !Ref NatGateway3
+
+  NatRoutePrivate3:
+    Type: AWS::EC2::Route
+    Condition: CreatePerAzNatGateways
+    Properties:
+      RouteTableId: !Ref RouteTablePrivate3
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NatGateway3
+
+  InternetRouteIntraVpc3:
+    Type: AWS::EC2::Route
+    Condition: CreateIntraVpcPerAzNatGatewaysRoutes
+    DependsOn: AttachGateway
+    Properties:
+      RouteTableId: !Ref RouteTableIntraVpc3
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NatGateway3
 
 # Associate the Public route table to the the first public subnet
 
@@ -462,7 +689,7 @@ Resources:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       SubnetId: !Ref PrivateSubnet2
-      RouteTableId: !Ref RouteTablePrivate
+      RouteTableId: !If [ CreatePerAzNatGateways , !Ref RouteTablePrivate2 , !Ref RouteTablePrivate ]
 
 # Associate the Secondary Private route table to the the third private subnet
 
@@ -470,7 +697,7 @@ Resources:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       SubnetId: !Ref PrivateSubnet3
-      RouteTableId: !Ref RouteTablePrivate
+      RouteTableId: !If [ CreatePerAzNatGateways , !Ref RouteTablePrivate3 , !Ref RouteTablePrivate ]
 
 # Associate the primary IntraVpc route table to the the first private subnet
 
@@ -488,7 +715,8 @@ Resources:
     Condition: CreateIntraVpc
     Properties:
       SubnetId: !Ref IntraVpcSubnet2
-      RouteTableId: !Ref RouteTableIntraVpc
+      RouteTableId: !If [ CreateIntraVpcPerAzNatGatewaysRoutes , !Ref RouteTableIntraVpc2 , !Ref RouteTableIntraVpc ]
+
 
 # Associate the Secondary IntraVpc route table to the the third private subnet
 
@@ -497,7 +725,17 @@ Resources:
     Condition: CreateIntraVpc
     Properties:
       SubnetId: !Ref IntraVpcSubnet3
-      RouteTableId: !Ref RouteTableIntraVpc
+      RouteTableId: !If [ CreateIntraVpcPerAzNatGatewaysRoutes , !Ref RouteTableIntraVpc3 , !Ref RouteTableIntraVpc ]
+
+# Setup S3 VPC Endpoint if required
+                  
+  S3Endpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Condition: CreateS3VpcEndpoint
+    Properties:    
+      RouteTableIds: !If [ CreatePerAzNatGateways , [!Ref RouteTablePrivate, !Ref RouteTablePrivate2, !Ref RouteTablePrivate3], [!Ref RouteTablePrivate] ]
+      ServiceName: !Sub com.amazonaws.${AWS::Region}.s3
+      VpcId: !Ref Vpc
 
 Outputs:
 
