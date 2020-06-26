@@ -896,10 +896,10 @@ Outputs:
     Export:
       Name: SC-VPC-IntraVpcSubnet-CidrBlocks
 
-  NatGatewayEip:
+  NatGatewayEip1:
     Value: !Ref NatGatewayEip
     Export:
-      Name: SC-VPC-NatGatewayEip
+      Name: SC-VPC-NatGatewayEip1
 
   NatGatewayEip2:
     Condition: CreatePerAzNatGateways
@@ -915,7 +915,8 @@ Outputs:
 
   NatGatewayEips:
     Value:
-      - !If CreatePerAzNatGateways
+      !If 
+      - CreatePerAzNatGateways
       - !Join [",", [!Ref NatGatewayEip, !Ref NatGatewayEip2, !Ref NatGatewayEip3]]
       - !Ref NatGatewayEip
     Export:
