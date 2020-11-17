@@ -82,10 +82,6 @@ Metadata:
         default: S3 VPC Endpoint lower data transfer lower by allowing internal connections to S3
       ConnectToCentralRouter:
         default: Connect to central router (Transit Gateway)
-      UseMediaItDomainServices:
-        default: Access to MediaIT services 
-      # EnableIPv6:
-        # default: IPv6 addressing on public subnets
       CustomImplementationTag:
         default: Customized implemetation Tag
 
@@ -743,16 +739,6 @@ Resources:
       RouteTableIds: !If [ CreatePerAzNatGateways , [!Ref RouteTablePrivate, !Ref RouteTablePrivate2, !Ref RouteTablePrivate3], [!Ref RouteTablePrivate] ]
       ServiceName: !Sub com.amazonaws.${AWS::Region}.s3
       VpcId: !Ref Vpc
-
-# Associate mediait.ch DNS reslover rule if needed
-
-  AssociateMediaItResolverRule:
-    Condition: AssociateMediaItDnsResolver
-    Type: AWS::Route53Resolver::ResolverRuleAssociation
-    Properties: 
-      Name: MediaItDnsRuleAssociation
-      ResolverRuleId: !FindInMap [RegionMap, !Ref "AWS::Region", MediaItResolverRuleId]
-      VPCId: !Ref Vpc
 
 Outputs:
 
