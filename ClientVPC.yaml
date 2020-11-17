@@ -116,7 +116,7 @@ Resources:
   VpcIpAddressesCustomResource:
     Type: Custom::VpcIpAddresses
     Properties: 
-      ServiceToken: !Sub arn:aws:sns:${AWS::Region}:733626620836:VpcIpAddressesDevCustomResource
+      ServiceToken: !Sub arn:aws:sns:${AWS::Region}:733626620836:VpcIpAddressesCustomResource
       VpcSize: !Ref VpcSize
       Token: !Ref ValidationToken
 
