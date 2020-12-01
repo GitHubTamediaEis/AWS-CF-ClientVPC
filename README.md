@@ -81,7 +81,7 @@ This is for specific use cases discussed and implemented by Network Services.
   
 ### Why choose a service catalog's VPC rather than a simple AWS VPC
 
-By choosing the VPC proposed in the catalog service you have the possibility to choose VPC solution that, in addition to having the size you want, allows you to have no overlapping. In fact, the range of IP addresses that are assigned to its networks is unique which allows you to reach external services and to be reached by external services. Moreover, we offer you the possibility to enable communication between several VPC companies but also to communicate with shared services such as VPN, all thanks to our transit gateway.  
+By choosing the VPC proposed in the catalog service you have the possibility to choose VPC solution that, in addition to having the size you want, allows you to have no overlapping. In fact, the range of IP addresses that are assigned to its networks is unique which allows the Inter-connectivity with central services. Moreover, we offer you the possibility to enable communication between several VPC companies but also to communicate with shared services such as AD and Intern DNS, all thanks to our transit gateway.  You can also reach On-prem services with the VPN. You have at your disposal global variables that will allow an easy development thanks to standardization.
 
 #### Glossary
 
