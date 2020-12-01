@@ -11,30 +11,29 @@ This page will guide you through the process of deploying said VPC.
 
 To deploy a VPC, navigate to the <a href="./serviceCatalog.md">service catalog</a>, which contains all of the available services you can deploy within AWS.
 
-### Parameters
+#### Parameters
 
-#### VpcSize
-Select the size of your VPC (S, S2, M, L, XL).
+- VpcSize
+Select the size of your VPC (S, S2, M, M2, L, L2, XL, XL2).
 
-##### Standard size distribution
+#### Standard size distribution
 
-Size | S | M | L | XL
-:---: | ---: | ---: | ---: | ---:
-**Private subnet** | 64 | 256 | 1024 | 4096
-**Public subnet** | 16 | 64 | 256 | 1024
-**IntraVPC subnet** | 0 | 16 | 64 | 256
+Size                    |  S  |   M  |   L  |  XL
+                        |---: | ---: | ---: | ---: 
+**Private subnet**      | 64  | 256  | 1024 | 4096
+**Public subnet**       | 16  |  64  |  256 | 1024
+**IntraVPC subnet**     |  0  |  16  |   64 |  256
 
-##### Optional size distribution
+#### Optional size distribution
 
-Size | S2 | M2 | L2 | XL2
-:---: | ---: | ---: | ---: | ---:
-**Private subnet** | 32 | 128 | 512 | 2048
-**Public subnet** | 32 | 128 | 512 | 2048
-**IntraVPC subnet** | 0 | 16 | 64 | 256
+Size                    |  S2 |  M2  |  L2  |  XL2
+                        |---: | ---: | ---: | ---: 
+**Private subnet**      | 32  | 128  |  512 | 2048
+**Public subnet**       | 32  | 128  |  512 | 2048
+**IntraVPC subnet**     |  0  |  16  |   64 |  256
 
-Sizes are subject to possible changes.
+##### Token for M, M2, L, L2, XL and XL2 sized VPC
 
-#### Token for M, L and XL sized VPC
 If you select a VPC size other than S, you need to request a token from Network Services first (network@tamedia.ch) providing the following details: Requirement for bigger VPCs (the number of needed IP addresses), the region to deploy in, your account ID and the desired VPC size.
 
 #### Connect to central router (Transit Gateway)
@@ -48,7 +47,7 @@ Allow (or not) connections to other accounts in EIS infrastructure, for VPN acce
 Allow (or not) your VPC to join the mediait domain.
 
 #### Tag (Custom implementations)
-This is for specific use cases discussed and implemented by Network Services, e.g specific VPN access or inter-application connections.
+This is for specific use cases discussed and implemented by Network Services.
 
 ## Glossary
 - AWS - Amazon Web Services
