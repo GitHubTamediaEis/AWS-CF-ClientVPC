@@ -87,4 +87,4 @@ By choosing the VPC proposed in the catalog service you have the possibility to 
 
 - AWS - Amazon Web Services
 
-- VPC - Virtual Private Cloud - Virtual Data Center
+- VPC - Virtual Private Cloud
