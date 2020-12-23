@@ -79,7 +79,7 @@ Metadata:
       PerAzNatGateways:
         default: One NAT gateway per AZ to get HA
       UseS3VpcEndpoint:
-        default: S3 VPC Endpoint lower data transfer lower by allowing internal connections to S3
+        default: S3 VPC Endpoint lower data transfer total price by allowing internal connections to S3
       ConnectToCentralRouter:
         default: Connect to central router (Transit Gateway)
       CustomImplementationTag:
