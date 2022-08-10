@@ -42,7 +42,7 @@ Parameters:
   UseS3VpcEndpoint:
     Type: String
     Default: "yes"
-    Description: Do you need a S3 VPC endpoint  (no/YES)
+    Description: Do you need a S3 VPC endpoint (no/YES)
     AllowedValues: 
       - "yes"
       - "no"
@@ -52,6 +52,15 @@ Parameters:
     Type: String
     Default: ""
     Description: "Custom ID provided by Tamedia IT for specific implementation, if any"
+
+  SubnetsForContainers:
+    Type: String
+    Default: "no"
+    Description: Do you need subnets for containers (no/YES). Adds big sized intra VPC subnet using shared (same) IPs like on other VPCs. Usefull in order to support container deployments.
+    AllowedValues: 
+      - "yes"
+      - "no"
+    ConstraintDescription: Value must be either "yes" or "no".
 
 Metadata:
   AWS::CloudFormation::Interface:
@@ -70,6 +79,9 @@ Metadata:
       - Label: { default: Customized implementations }
         Parameters:
           - CustomImplementationTag
+      - Label: { default: Containers deployment }
+        Parameters:
+          - SubnetsForContainers
 
     ParameterLabels:
       VpcSize:
@@ -84,10 +96,13 @@ Metadata:
         default: Connect to central router (Transit Gateway)
       CustomImplementationTag:
         default: Customized implemetation Tag
+      SubnetsForContainers:
+        default: Subnets for containers
 
 Conditions:
   CreateTGWAttachement: !Equals [ !Ref ConnectToCentralRouter, "yes" ]
-  CreateIntraVpc: !Not [ !Or [ !Equals [ !Ref VpcSize, "S"  ], !Equals [ !Ref VpcSize, "S2" ] ] ] 
+  CreateSubnetsForContainers: !Equals [ !Ref SubnetsForContainers, "yes" ]
+  CreateIntraVpc: !And [ !Not [ !Or [ !Equals [ !Ref VpcSize, "S"  ], !Equals [ !Ref VpcSize, "S2" ] ] ], !Not [ !Condition CreateSubnetsForContainers ] ]
   CreatePerAzNatGateways: !Equals [ !Ref PerAzNatGateways, "yes" ]
   CreateTGWAttachementAndPerAzNatGateways: !And [ !Equals [ !Ref ConnectToCentralRouter, "yes" ], !Equals [ !Ref PerAzNatGateways, "yes" ] ]
   CreateIntraVpcPerAzNatGatewaysRoutes: !And [ !Not [ !Equals [ !Ref VpcSize, "S" ] ], !Equals [ !Ref PerAzNatGateways, "yes" ] ]
@@ -131,6 +146,13 @@ Resources:
       Tags:
       - Key: Name
         Value: SC-VPC
+
+  VpcCidrBlock:
+    Condition: CreateSubnetsForContainers
+    Type: AWS::EC2::VPCCidrBlock
+    Properties:
+      VpcId: !Ref Vpc
+      CidrBlock: 10.196.0.0/18
 
 # Setup the primary public subnet
 
@@ -223,6 +245,17 @@ Resources:
         - Key: Name
           Value: SC-VPC-IntraVpcSubnet1
 
+  IntraVpcSubnet1Bis:
+    Type: AWS::EC2::Subnet
+    Condition: CreateSubnetsForContainers
+    Properties:
+      AvailabilityZone: !FindInMap [RegionMap, !Ref "AWS::Region", Az1]
+      VpcId: !Ref Vpc
+      CidrBlock: 10.196.0.0/20
+      Tags:
+        - Key: Name
+          Value: SC-VPC-IntraVpcSubnet1
+
 # Setup the secondary intra subnet
 
   IntraVpcSubnet2:
@@ -236,6 +269,17 @@ Resources:
         - Key: Name
           Value: SC-VPC-IntraVpcSubnet2
 
+  IntraVpcSubnet2Bis:
+    Type: AWS::EC2::Subnet
+    Condition: CreateSubnetsForContainers
+    Properties:
+      AvailabilityZone: !FindInMap [RegionMap, !Ref "AWS::Region", Az2]
+      VpcId: !Ref Vpc
+      CidrBlock: 10.196.16.0/20
+      Tags:
+        - Key: Name
+          Value: SC-VPC-IntraVpcSubnet2
+
 # Setup the third intra subnet
 
   IntraVpcSubnet3:
@@ -245,6 +289,17 @@ Resources:
       AvailabilityZone: !FindInMap [RegionMap, !Ref "AWS::Region", Az3]
       VpcId: !Ref Vpc
       CidrBlock: !GetAtt VpcIpAddressesCustomResource.outputAz3IntraVpc
+      Tags:
+        - Key: Name
+          Value: SC-VPC-IntraVpcSubnet3
+
+  IntraVpcSubnet3Bis:
+    Type: AWS::EC2::Subnet
+    Condition: CreateSubnetsForContainers
+    Properties:
+      AvailabilityZone: !FindInMap [RegionMap, !Ref "AWS::Region", Az3]
+      VpcId: !Ref Vpc
+      CidrBlock: 10.196.32.0/20
       Tags:
         - Key: Name
           Value: SC-VPC-IntraVpcSubnet3
@@ -505,7 +560,6 @@ Resources:
       RouteTableId: !Ref RouteTablePrivate
       DestinationCidrBlock: 192.168.0.0/16
       TransitGatewayId: !FindInMap [RegionMap, !Ref "AWS::Region", TransitGatewayId]
-      
 
   DmzRoutePrivate:
     Type: AWS::EC2::Route
@@ -751,6 +805,12 @@ Outputs:
     Value: !GetAtt VpcIpAddressesCustomResource.outputVpcCidrBlock
     Export:
       Name: SC-VPC-CidrBlock
+  
+  SecondaryVpcCidrBlock:
+    Condition: CreateSubnetsForContainers
+    Value: !Ref VpcCidrBlock
+    Export:
+      Name: SC-VPC-SecondaryCidrBlock
 
   Az1:
     Value: !FindInMap [RegionMap, !Ref "AWS::Region", Az1]
@@ -858,9 +918,21 @@ Outputs:
     Export:
       Name: SC-VPC-IntraVpcSubnet1
 
+  IntraVpcSubnet1Bis:
+    Condition: CreateSubnetsForContainers
+    Value: !Ref IntraVpcSubnet1Bis
+    Export:
+      Name: SC-VPC-IntraVpcSubnet1
+
   IntraVpcSubnet2:
     Condition: CreateIntraVpc
     Value: !Ref IntraVpcSubnet2
+    Export:
+      Name: SC-VPC-IntraVpcSubnet2
+
+  IntraVpcSubnet2Bis:
+    Condition: CreateSubnetsForContainers
+    Value: !Ref IntraVpcSubnet2Bis
     Export:
       Name: SC-VPC-IntraVpcSubnet2
 
@@ -870,9 +942,21 @@ Outputs:
     Export:
       Name: SC-VPC-IntraVpcSubnet3
 
+  IntraVpcSubnet3Bis:
+    Condition: CreateSubnetsForContainers
+    Value: !Ref IntraVpcSubnet3Bis
+    Export:
+      Name: SC-VPC-IntraVpcSubnet3
+
   IntraVpcSubnets:
     Condition: CreateIntraVpc
     Value: !Join [",", [!Ref IntraVpcSubnet1, !Ref IntraVpcSubnet2, !Ref IntraVpcSubnet3]]
+    Export:
+      Name: SC-VPC-IntraVpcSubnets   
+
+  IntraVpcSubnetsBis:
+    Condition: CreateSubnetsForContainers
+    Value: !Join [",", [!Ref IntraVpcSubnet1Bis, !Ref IntraVpcSubnet2Bis, !Ref IntraVpcSubnet3Bis]]
     Export:
       Name: SC-VPC-IntraVpcSubnets   
       
@@ -881,10 +965,22 @@ Outputs:
     Value: !GetAtt VpcIpAddressesCustomResource.outputAz1IntraVpc
     Export:
       Name: SC-VPC-IntraVpcSubnet1-CidrBlock
+
+  IntraVpcSubnet1BisCidrBlock:
+    Condition: CreateSubnetsForContainers
+    Value: 10.196.0.0/20
+    Export:
+      Name: SC-VPC-IntraVpcSubnet1-CidrBlock
       
   IntraVpcSubnet2CidrBlock:
     Condition: CreateIntraVpc
     Value: !GetAtt VpcIpAddressesCustomResource.outputAz2IntraVpc
+    Export:
+      Name: SC-VPC-IntraVpcSubnet2-CidrBlock
+  
+  IntraVpcSubnet2BisCidrBlock:
+    Condition: CreateSubnetsForContainers
+    Value: 10.196.16.0/20
     Export:
       Name: SC-VPC-IntraVpcSubnet2-CidrBlock
       
@@ -894,10 +990,21 @@ Outputs:
     Export:
       Name: SC-VPC-IntraVpcSubnet3-CidrBlock
 
+  IntraVpcSubnet3BisCidrBlock:
+    Condition: CreateSubnetsForContainers
+    Value: 10.196.32.0/20
+    Export:
+      Name: SC-VPC-IntraVpcSubnet3-CidrBlock
+
   IntraVpcSubnetCidrBlocks:
     Value: !Join [",", [!GetAtt VpcIpAddressesCustomResource.outputAz1IntraVpc, !GetAtt VpcIpAddressesCustomResource.outputAz2IntraVpc, !GetAtt VpcIpAddressesCustomResource.outputAz3IntraVpc]]
     Export:
       Name: SC-VPC-IntraVpcSubnet-CidrBlocks
+
+  IntraVpcSubnetCidrBlocksBis:
+    Value: !Join [",", [10.196.0.0/20, 10.196.16.0/20, 10.196.32.0/20]]
+    Export:
+      Name: SC-VPC-IntraVpcSubnet-CidrBlocksBis
 
   NatGatewayEip1:
     Value: !Ref NatGatewayEip
