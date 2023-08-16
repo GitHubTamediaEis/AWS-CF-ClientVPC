@@ -30,10 +30,19 @@ Parameters:
       - "no"
     ConstraintDescription: Value must be either "yes" or "no".
 
+  UseInternalDNS:
+    Type: String
+    Description: Use internal DNS servers for the mediait.ch (yes/NO)
+    Default: "no"
+    AllowedValues: 
+      - "yes"
+      - "no"
+    ConstraintDescription: Value must be either "yes" or "no".
+
   PerAzNatGateways:
     Type: String
     Default: "yes"
-    Description: Do you need an highly available NAT gateway (no/YES) 
+    Description: Do you need an highly available NAT gateway (YES/no) 
     AllowedValues: 
       - "yes"
       - "no"
@@ -42,7 +51,7 @@ Parameters:
   UseS3VpcEndpoint:
     Type: String
     Default: "yes"
-    Description: Do you need a S3 VPC endpoint  (no/YES)
+    Description: Do you need a S3 VPC endpoint  (yes/NO)
     AllowedValues: 
       - "yes"
       - "no"
@@ -67,6 +76,7 @@ Metadata:
       - Label: { default: Central Services }
         Parameters:
           - ConnectToCentralRouter
+          - UseInternalDNS
       - Label: { default: Customized implementations }
         Parameters:
           - CustomImplementationTag
@@ -82,6 +92,8 @@ Metadata:
         default: S3 VPC Endpoint lower data transfer total price by allowing internal connections to S3
       ConnectToCentralRouter:
         default: Connect to central router (Transit Gateway)
+      UseInternalDNS:
+        default: Use internal DNS servers to resolve mediait.ch records
       CustomImplementationTag:
         default: Customized implemetation Tag
 
@@ -90,6 +102,7 @@ Conditions:
   CreateIntraVpc: !Not [ !Or [ !Equals [ !Ref VpcSize, "S"  ], !Equals [ !Ref VpcSize, "S2" ] ] ] 
   CreatePerAzNatGateways: !Equals [ !Ref PerAzNatGateways, "yes" ]
   CreateTGWAttachementAndPerAzNatGateways: !And [ !Equals [ !Ref ConnectToCentralRouter, "yes" ], !Equals [ !Ref PerAzNatGateways, "yes" ] ]
+  AssociateMediaItResolverRule: !Equals [ !Ref UseInternalDNS, "yes" ]
   CreateIntraVpcPerAzNatGatewaysRoutes: !And [ !Not [ !Equals [ !Ref VpcSize, "S" ] ], !Equals [ !Ref PerAzNatGateways, "yes" ] ]
   CreateS3VpcEndpoint: !Equals [ !Ref UseS3VpcEndpoint, "yes" ]
 
@@ -729,6 +742,16 @@ Resources:
     Properties:
       SubnetId: !Ref IntraVpcSubnet3
       RouteTableId: !If [ CreateIntraVpcPerAzNatGatewaysRoutes , !Ref RouteTableIntraVpc3 , !Ref RouteTableIntraVpc ]
+
+# Associate mediait.ch DNS reslover rule if needed
+
+  MediaItResolverRuleAssociation:
+    Condition: AssociateMediaItResolverRule
+    Type: AWS::Route53Resolver::ResolverRuleAssociation
+    Properties: 
+      Name: MediaItDnsRuleAssociation
+      ResolverRuleId: "rslvr-rr-19d7f32e7a0a41959"
+      VPCId: !Ref Vpc
 
 # Setup S3 VPC Endpoint if required
                   
