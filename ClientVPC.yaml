@@ -76,7 +76,7 @@ Metadata:
     ParameterGroups:
       - Label: { default: Vpc relatives }
         Parameters:
-		      - ScalablePlatformSubnets
+          - ScalablePlatformSubnets
           - VpcSize
           - ValidationToken
       - Label: { default: AWS Services }
@@ -599,7 +599,7 @@ Resources:
     Properties:
       SubnetId: !Ref ScalablePlatformSubnet1
       RouteTableId: !Ref RouteTablePrivate
-	  
+
 # Associate the secondary Private route table to the the second scalable platform subnet
 
   SubnetRouteTableAssociationScalablePlatformSubnet2:
