@@ -62,11 +62,21 @@ Parameters:
     Default: ""
     Description: "Custom ID provided by Tamedia IT for specific implementation, if any"
 
+  ScalablePlatformSubnets:
+    Type: String
+    Default: "no"
+    Description: "Do you need to deploy additional private subnets for a scalable platform like f. ex. Kubernetes (yes/NO)"
+    AllowedValues: 
+      - "yes"
+      - "no"
+    ConstraintDescription: Value must be either "yes" or "no".
+
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
-      - Label: { default: Vpc size }
+      - Label: { default: Vpc relatives }
         Parameters:
+		      - ScalablePlatformSubnets
           - VpcSize
           - ValidationToken
       - Label: { default: AWS Services }
@@ -96,6 +106,8 @@ Metadata:
         default: Use internal DNS servers to resolve mediait.ch records
       CustomImplementationTag:
         default: Customized implemetation Tag
+      ScalablePlatformSubnets:
+        default: Additional private networks
 
 Conditions:
   CreateTGWAttachement: !Equals [ !Ref ConnectToCentralRouter, "yes" ]
@@ -105,6 +117,7 @@ Conditions:
   AssociateMediaItResolverRule: !Equals [ !Ref UseInternalDNS, "yes" ]
   CreateIntraVpcPerAzNatGatewaysRoutes: !And [ !Not [ !Equals [ !Ref VpcSize, "S" ] ], !Equals [ !Ref PerAzNatGateways, "yes" ] ]
   CreateS3VpcEndpoint: !Equals [ !Ref UseS3VpcEndpoint, "yes" ]
+  CreateScalablePlatformSubnets: !Equals [ !Ref ScalablePlatformSubnets, "yes" ]
 
 Mappings: 
   RegionMap: 
@@ -261,6 +274,42 @@ Resources:
       Tags:
         - Key: Name
           Value: SC-VPC-IntraVpcSubnet3
+
+# Setup the primary scalable platform subnet
+
+  ScalablePlatformSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !FindInMap [RegionMap, !Ref "AWS::Region", Az1]
+      VpcId: !Ref Vpc
+      CidrBlock: 10.200.0.0/22
+      Tags:
+        - Key: Name
+          Value: SC-VPC-ScalablePlatformSubnet1
+
+# Setup the secondary scalable platform subnet
+
+  ScalablePlatformSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !FindInMap [RegionMap, !Ref "AWS::Region", Az2]
+      VpcId: !Ref Vpc
+      CidrBlock: 10.204.0.0/22
+      Tags:
+        - Key: Name
+          Value: SC-VPC-ScalablePlatformSubnet2
+
+# Setup the third scalable platform subnet
+
+  ScalablePlatformSubnet3:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !FindInMap [RegionMap, !Ref "AWS::Region", Az3]
+      VpcId: !Ref Vpc
+      CidrBlock: 10.208.0.0/22
+      Tags:
+        - Key: Name
+          Value: SC-VPC-ScalablePlatformSubnet3
 
 # Setup the internet gateway
 
@@ -542,6 +591,30 @@ Resources:
       RouteTableId: !Ref RouteTableIntraVpc
       DestinationCidrBlock: 0.0.0.0/0
       NatGatewayId: !Ref NatGateway
+
+# Associate the primary Private route table to the first scalable platform subnet
+
+  SubnetRouteTableAssociationScalablePlatformSubnet1:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref ScalablePlatformSubnet1
+      RouteTableId: !Ref RouteTablePrivate
+	  
+# Associate the secondary Private route table to the the second scalable platform subnet
+
+  SubnetRouteTableAssociationScalablePlatformSubnet2:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref ScalablePlatformSubnet2
+      RouteTableId: !If [ CreatePerAzNatGateways , !Ref RouteTablePrivate2 , !Ref RouteTablePrivate ]
+
+# Associate the tertiary Private route table to the the third scalable platform subnet
+
+  SubnetRouteTableAssociationScalablePlatformSubnet3:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref ScalablePlatformSubnet3
+      RouteTableId: !If [ CreatePerAzNatGateways , !Ref RouteTablePrivate3 , !Ref RouteTablePrivate ]
 
 # Extra routes when implementing HA NAT getways
 
@@ -851,6 +924,26 @@ Outputs:
 
   PrivateSubnets:
     Value: !Join [",", [!Ref PrivateSubnet1, !Ref PrivateSubnet2, !Ref PrivateSubnet3]]
+    Export:
+      Name: SC-VPC-PrivateSubnets
+
+  ScalablePlatformSubnet1:
+    Value: !Ref ScalablePlatformSubnet1
+    Export:
+      Name: SC-VPC-ScalablePlatformSubnet1
+
+  ScalablePlatformSubnet2:
+    Value: !Ref ScalablePlatformSubnet2
+    Export:
+      Name: SC-VPC-ScalablePlatformSubnet2
+
+  ScalablePlatformSubnet3:
+    Value: !Ref ScalablePlatformSubnet3
+    Export:
+      Name: SC-VPC-ScalablePlatformSubnet3
+
+  PrivateSubnets:
+    Value: !Join [",", [!Ref ScalablePlatformSubnet1, !Ref ScalablePlatformSubnet2, !Ref ScalablePlatformSubnet3]]
     Export:
       Name: SC-VPC-PrivateSubnets
 
