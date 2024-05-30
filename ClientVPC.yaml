@@ -21,6 +21,15 @@ Parameters:
     Type: String
     Description: "If you select a VPC size other than S or S2, you need to request a token from Network Services first (network@tamedia.ch) providing the following details: Requirement for bigger VPCs (the number of needed IP addresses), the region to deploy in, your account ID and the desired VPC size."
 
+  ScalablePlatformSubnets:
+    Type: String
+    Default: "no"
+    Description: "Do you need to deploy additional private subnets for a scalable platform like f. ex. Kubernetes (yes/NO)"
+    AllowedValues: 
+      - "yes"
+      - "no"
+    ConstraintDescription: Value must be either "yes" or "no".
+
   ConnectToCentralRouter:
     Type: String
     Default: "yes"
@@ -62,23 +71,14 @@ Parameters:
     Default: ""
     Description: "Custom ID provided by Tamedia IT for specific implementation, if any"
 
-  ScalablePlatformSubnets:
-    Type: String
-    Default: "no"
-    Description: "Do you need to deploy additional private subnets for a scalable platform like f. ex. Kubernetes (yes/NO)"
-    AllowedValues: 
-      - "yes"
-      - "no"
-    ConstraintDescription: Value must be either "yes" or "no".
-
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
       - Label: { default: Vpc relatives }
         Parameters:
-          - ScalablePlatformSubnets
           - VpcSize
           - ValidationToken
+          - ScalablePlatformSubnets
       - Label: { default: AWS Services }
         Parameters:
           - PerAzNatGateways    
@@ -96,6 +96,8 @@ Metadata:
         default: Size of the VPC
       ValidationToken:
         default: Token for M, L and XL sized VPC
+      ScalablePlatformSubnets:
+        default: Additional private networks
       PerAzNatGateways:
         default: One NAT gateway per AZ to get HA
       UseS3VpcEndpoint:
@@ -106,18 +108,16 @@ Metadata:
         default: Use internal DNS servers to resolve mediait.ch records
       CustomImplementationTag:
         default: Customized implemetation Tag
-      ScalablePlatformSubnets:
-        default: Additional private networks
 
 Conditions:
   CreateTGWAttachement: !Equals [ !Ref ConnectToCentralRouter, "yes" ]
   CreateIntraVpc: !Not [ !Or [ !Equals [ !Ref VpcSize, "S"  ], !Equals [ !Ref VpcSize, "S2" ] ] ] 
+  CreateScalablePlatformSubnets: !Equals [ !Ref ScalablePlatformSubnets, "yes" ]
   CreatePerAzNatGateways: !Equals [ !Ref PerAzNatGateways, "yes" ]
   CreateTGWAttachementAndPerAzNatGateways: !And [ !Equals [ !Ref ConnectToCentralRouter, "yes" ], !Equals [ !Ref PerAzNatGateways, "yes" ] ]
   AssociateMediaItResolverRule: !Equals [ !Ref UseInternalDNS, "yes" ]
   CreateIntraVpcPerAzNatGatewaysRoutes: !And [ !Not [ !Equals [ !Ref VpcSize, "S" ] ], !Equals [ !Ref PerAzNatGateways, "yes" ] ]
   CreateS3VpcEndpoint: !Equals [ !Ref UseS3VpcEndpoint, "yes" ]
-  CreateScalablePlatformSubnets: !Equals [ !Ref ScalablePlatformSubnets, "yes" ]
 
 Mappings: 
   RegionMap: 
@@ -279,10 +279,11 @@ Resources:
 
   ScalablePlatformSubnet1:
     Type: AWS::EC2::Subnet
+    Condition: CreateScalablePlatformSubnets
     Properties:
       AvailabilityZone: !FindInMap [RegionMap, !Ref "AWS::Region", Az1]
       VpcId: !Ref Vpc
-      CidrBlock: 10.200.0.0/22
+      CidrBlock: "10.200.0.0/22"
       Tags:
         - Key: Name
           Value: SC-VPC-ScalablePlatformSubnet1
@@ -291,10 +292,11 @@ Resources:
 
   ScalablePlatformSubnet2:
     Type: AWS::EC2::Subnet
+    Condition: CreateScalablePlatformSubnets
     Properties:
       AvailabilityZone: !FindInMap [RegionMap, !Ref "AWS::Region", Az2]
       VpcId: !Ref Vpc
-      CidrBlock: 10.204.0.0/22
+      CidrBlock: "10.200.16.0/20"
       Tags:
         - Key: Name
           Value: SC-VPC-ScalablePlatformSubnet2
@@ -303,10 +305,11 @@ Resources:
 
   ScalablePlatformSubnet3:
     Type: AWS::EC2::Subnet
+    Condition: CreateScalablePlatformSubnets
     Properties:
       AvailabilityZone: !FindInMap [RegionMap, !Ref "AWS::Region", Az3]
       VpcId: !Ref Vpc
-      CidrBlock: 10.208.0.0/22
+      CidrBlock: "10.200.32.0/20"
       Tags:
         - Key: Name
           Value: SC-VPC-ScalablePlatformSubnet3
@@ -596,6 +599,7 @@ Resources:
 
   SubnetRouteTableAssociationScalablePlatformSubnet1:
     Type: AWS::EC2::SubnetRouteTableAssociation
+    Condition: CreateScalablePlatformSubnets
     Properties:
       SubnetId: !Ref ScalablePlatformSubnet1
       RouteTableId: !Ref RouteTablePrivate
@@ -604,6 +608,7 @@ Resources:
 
   SubnetRouteTableAssociationScalablePlatformSubnet2:
     Type: AWS::EC2::SubnetRouteTableAssociation
+    Condition: CreateScalablePlatformSubnets
     Properties:
       SubnetId: !Ref ScalablePlatformSubnet2
       RouteTableId: !If [ CreatePerAzNatGateways , !Ref RouteTablePrivate2 , !Ref RouteTablePrivate ]
@@ -612,6 +617,7 @@ Resources:
 
   SubnetRouteTableAssociationScalablePlatformSubnet3:
     Type: AWS::EC2::SubnetRouteTableAssociation
+    Condition: CreateScalablePlatformSubnets
     Properties:
       SubnetId: !Ref ScalablePlatformSubnet3
       RouteTableId: !If [ CreatePerAzNatGateways , !Ref RouteTablePrivate3 , !Ref RouteTablePrivate ]
@@ -928,24 +934,28 @@ Outputs:
       Name: SC-VPC-PrivateSubnets
 
   ScalablePlatformSubnet1:
+    Condition: CreateScalablePlatformSubnets
     Value: !Ref ScalablePlatformSubnet1
     Export:
       Name: SC-VPC-ScalablePlatformSubnet1
 
   ScalablePlatformSubnet2:
+    Condition: CreateScalablePlatformSubnets
     Value: !Ref ScalablePlatformSubnet2
     Export:
       Name: SC-VPC-ScalablePlatformSubnet2
 
   ScalablePlatformSubnet3:
+    Condition: CreateScalablePlatformSubnets
     Value: !Ref ScalablePlatformSubnet3
     Export:
       Name: SC-VPC-ScalablePlatformSubnet3
 
-  PrivateSubnets:
+  ScalablePlatformSubnets:
+    Condition: CreateScalablePlatformSubnets
     Value: !Join [",", [!Ref ScalablePlatformSubnet1, !Ref ScalablePlatformSubnet2, !Ref ScalablePlatformSubnet3]]
     Export:
-      Name: SC-VPC-PrivateSubnets
+      Name: SC-VPC-ScalablePlatformSubnets
 
   PrivateSubnet1CidrBlock:
     Value: !GetAtt VpcIpAddressesCustomResource.outputAz1Private
