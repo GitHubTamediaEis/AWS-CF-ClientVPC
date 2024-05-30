@@ -97,7 +97,7 @@ Metadata:
       ValidationToken:
         default: Token for M, L and XL sized VPC
       ScalablePlatformSubnets:
-        default: Additional private networks
+        default: Add additional private networks for a scalable platform (like Kubernetes)
       PerAzNatGateways:
         default: One NAT gateway per AZ to get HA
       UseS3VpcEndpoint:
@@ -157,6 +157,14 @@ Resources:
       Tags:
       - Key: Name
         Value: SC-VPC
+
+# Add additional cidr block for scalable plateform subnet, if required.
+  ScalablePlatformCIDRblock:
+    Type: AWS::EC2::VPCCidrBlock
+    Condition: CreateScalablePlatformSubnets
+    Properties:
+      CidrBlock: 10.200.0.0/16
+      VpcId: !Ref Vpc
 
 # Setup the primary public subnet
 
@@ -280,10 +288,11 @@ Resources:
   ScalablePlatformSubnet1:
     Type: AWS::EC2::Subnet
     Condition: CreateScalablePlatformSubnets
+    DependsOn: ScalablePlatformCIDRblock
     Properties:
       AvailabilityZone: !FindInMap [RegionMap, !Ref "AWS::Region", Az1]
       VpcId: !Ref Vpc
-      CidrBlock: "10.200.0.0/22"
+      CidrBlock: "10.200.0.0/20"
       Tags:
         - Key: Name
           Value: SC-VPC-ScalablePlatformSubnet1
@@ -293,6 +302,7 @@ Resources:
   ScalablePlatformSubnet2:
     Type: AWS::EC2::Subnet
     Condition: CreateScalablePlatformSubnets
+    DependsOn: ScalablePlatformCIDRblock
     Properties:
       AvailabilityZone: !FindInMap [RegionMap, !Ref "AWS::Region", Az2]
       VpcId: !Ref Vpc
@@ -306,6 +316,7 @@ Resources:
   ScalablePlatformSubnet3:
     Type: AWS::EC2::Subnet
     Condition: CreateScalablePlatformSubnets
+    DependsOn: ScalablePlatformCIDRblock
     Properties:
       AvailabilityZone: !FindInMap [RegionMap, !Ref "AWS::Region", Az3]
       VpcId: !Ref Vpc
