@@ -391,7 +391,7 @@ Resources:
 
   NatGateway:
     Type: AWS::EC2::NatGateway
-    DependsOn: InternetGateway
+    DependsOn: AttachGateway
     Properties:
       AllocationId: !GetAtt NatGatewayEip.AllocationId
       SubnetId: !Ref PublicSubnet1
@@ -402,7 +402,7 @@ Resources:
   NatGateway2:
     Condition: CreatePerAzNatGateways
     Type: AWS::EC2::NatGateway
-    DependsOn: InternetGateway
+    DependsOn: AttachGateway
     Properties:
       AllocationId: !GetAtt NatGatewayEip2.AllocationId
       SubnetId: !Ref PublicSubnet2
@@ -413,7 +413,7 @@ Resources:
   NatGateway3:
     Condition: CreatePerAzNatGateways
     Type: AWS::EC2::NatGateway
-    DependsOn: InternetGateway
+    DependsOn: AttachGateway
     Properties:
       AllocationId: !GetAtt NatGatewayEip3.AllocationId
       SubnetId: !Ref PublicSubnet3
