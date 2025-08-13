@@ -724,22 +724,6 @@ Resources:
       DestinationCidrBlock: 192.168.0.0/16
       TransitGatewayId: !FindInMap [RegionMap, !Ref "AWS::Region", TransitGatewayId]
 
-  DmzRoutePrivate2:
-    Type: AWS::EC2::Route
-    Condition: CreatePerAzNatGateways
-    Properties:
-      RouteTableId: !Ref RouteTablePrivate2
-      DestinationCidrBlock: 145.234.240.0/22
-      NatGatewayId: !Ref NatGateway2
-
-  NatRoutePrivate2:
-    Type: AWS::EC2::Route
-    Condition: CreatePerAzNatGateways
-    Properties:
-      RouteTableId: !Ref RouteTablePrivate2
-      DestinationCidrBlock: 0.0.0.0/0
-      NatGatewayId: !Ref NatGateway2
-
   RoutePrivate2TGW5:
     Type: AWS::EC2::Route
     Condition: CreateTGWAttachement
@@ -766,6 +750,22 @@ Resources:
       RouteTableId: !Ref RouteTablePrivate2
       DestinationCidrBlock: 62.192.13.152/29
       TransitGatewayId: !FindInMap [RegionMap, !Ref "AWS::Region", TransitGatewayId]
+
+  DmzRoutePrivate2:
+    Type: AWS::EC2::Route
+    Condition: CreatePerAzNatGateways
+    Properties:
+      RouteTableId: !Ref RouteTablePrivate2
+      DestinationCidrBlock: 145.234.240.0/22
+      NatGatewayId: !Ref NatGateway2
+
+  NatRoutePrivate2:
+    Type: AWS::EC2::Route
+    Condition: CreatePerAzNatGateways
+    Properties:
+      RouteTableId: !Ref RouteTablePrivate2
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NatGateway2
 
   InternetRouteIntraVpc2:
     Type: AWS::EC2::Route
