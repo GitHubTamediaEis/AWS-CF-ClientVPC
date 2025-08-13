@@ -536,6 +536,33 @@ Resources:
       DestinationCidrBlock: 192.168.0.0/16
       TransitGatewayId: !FindInMap [RegionMap, !Ref "AWS::Region", TransitGatewayId]
 
+  RoutePublicTGW5:
+    Type: AWS::EC2::Route
+    Condition: CreateTGWAttachement
+    DependsOn: AttachmentToTransitGateway
+    Properties:
+      RouteTableId: !Ref RouteTablePublic
+      DestinationCidrBlock: 172.14.1.0/24
+      TransitGatewayId: !FindInMap [RegionMap, !Ref "AWS::Region", TransitGatewayId]
+
+  RoutePublicTGW6:
+    Type: AWS::EC2::Route
+    Condition: CreateTGWAttachement
+    DependsOn: AttachmentToTransitGateway
+    Properties:
+      RouteTableId: !Ref RouteTablePublic
+      DestinationCidrBlock: 62.192.13.176/28
+      TransitGatewayId: !FindInMap [RegionMap, !Ref "AWS::Region", TransitGatewayId]
+
+  RoutePublicTGW7:
+    Type: AWS::EC2::Route
+    Condition: CreateTGWAttachement
+    DependsOn: AttachmentToTransitGateway
+    Properties:
+      RouteTableId: !Ref RouteTablePublic
+      DestinationCidrBlock: 62.192.13.152/29
+      TransitGatewayId: !FindInMap [RegionMap, !Ref "AWS::Region", TransitGatewayId]
+
   DmzRoutePublic:
     Type: AWS::EC2::Route
     DependsOn: AttachGateway
@@ -581,7 +608,33 @@ Resources:
       RouteTableId: !Ref RouteTablePrivate
       DestinationCidrBlock: 192.168.0.0/16
       TransitGatewayId: !FindInMap [RegionMap, !Ref "AWS::Region", TransitGatewayId]
-      
+
+  RoutePrivateTGW5:
+    Type: AWS::EC2::Route
+    Condition: CreateTGWAttachement
+    DependsOn: AttachmentToTransitGateway
+    Properties:
+      RouteTableId: !Ref RouteTablePrivate
+      DestinationCidrBlock: 172.14.1.0/24
+      TransitGatewayId: !FindInMap [RegionMap, !Ref "AWS::Region", TransitGatewayId]
+
+  RoutePrivateTGW6:
+    Type: AWS::EC2::Route
+    Condition: CreateTGWAttachement
+    DependsOn: AttachmentToTransitGateway
+    Properties:
+      RouteTableId: !Ref RouteTablePrivate
+      DestinationCidrBlock: 62.192.13.176/28
+      TransitGatewayId: !FindInMap [RegionMap, !Ref "AWS::Region", TransitGatewayId]
+
+  RoutePrivateTGW7:
+    Type: AWS::EC2::Route
+    Condition: CreateTGWAttachement
+    DependsOn: AttachmentToTransitGateway
+    Properties:
+      RouteTableId: !Ref RouteTablePrivate
+      DestinationCidrBlock: 62.192.13.152/29
+      TransitGatewayId: !FindInMap [RegionMap, !Ref "AWS::Region", TransitGatewayId]
 
   DmzRoutePrivate:
     Type: AWS::EC2::Route
@@ -671,6 +724,33 @@ Resources:
       DestinationCidrBlock: 192.168.0.0/16
       TransitGatewayId: !FindInMap [RegionMap, !Ref "AWS::Region", TransitGatewayId]
 
+  RoutePrivate2TGW5:
+    Type: AWS::EC2::Route
+    Condition: CreateTGWAttachement
+    DependsOn: AttachmentToTransitGateway
+    Properties:
+      RouteTableId: !Ref RouteTablePrivate2
+      DestinationCidrBlock: 172.14.1.0/24
+      TransitGatewayId: !FindInMap [RegionMap, !Ref "AWS::Region", TransitGatewayId]
+
+  RoutePrivate2TGW6:
+    Type: AWS::EC2::Route
+    Condition: CreateTGWAttachement
+    DependsOn: AttachmentToTransitGateway
+    Properties:
+      RouteTableId: !Ref RouteTablePrivate2
+      DestinationCidrBlock: 62.192.13.176/28
+      TransitGatewayId: !FindInMap [RegionMap, !Ref "AWS::Region", TransitGatewayId]
+
+  RoutePrivate2TGW7:
+    Type: AWS::EC2::Route
+    Condition: CreateTGWAttachement
+    DependsOn: AttachmentToTransitGateway
+    Properties:
+      RouteTableId: !Ref RouteTablePrivate2
+      DestinationCidrBlock: 62.192.13.152/29
+      TransitGatewayId: !FindInMap [RegionMap, !Ref "AWS::Region", TransitGatewayId]
+
   DmzRoutePrivate2:
     Type: AWS::EC2::Route
     Condition: CreatePerAzNatGateways
@@ -730,6 +810,33 @@ Resources:
     Properties:
       RouteTableId: !Ref RouteTablePrivate3
       DestinationCidrBlock: 192.168.0.0/16
+      TransitGatewayId: !FindInMap [RegionMap, !Ref "AWS::Region", TransitGatewayId]
+
+  RoutePrivate3TGW5:
+    Type: AWS::EC2::Route
+    Condition: CreateTGWAttachement
+    DependsOn: AttachmentToTransitGateway
+    Properties:
+      RouteTableId: !Ref RouteTablePrivate3
+      DestinationCidrBlock: 172.14.1.0/24
+      TransitGatewayId: !FindInMap [RegionMap, !Ref "AWS::Region", TransitGatewayId]
+
+  RoutePrivate3TGW6:
+    Type: AWS::EC2::Route
+    Condition: CreateTGWAttachement
+    DependsOn: AttachmentToTransitGateway
+    Properties:
+      RouteTableId: !Ref RouteTablePrivate3
+      DestinationCidrBlock: 62.192.13.176/28
+      TransitGatewayId: !FindInMap [RegionMap, !Ref "AWS::Region", TransitGatewayId]
+
+  RoutePrivate3TGW7:
+    Type: AWS::EC2::Route
+    Condition: CreateTGWAttachement
+    DependsOn: AttachmentToTransitGateway
+    Properties:
+      RouteTableId: !Ref RouteTablePrivate3
+      DestinationCidrBlock: 62.192.13.152/29
       TransitGatewayId: !FindInMap [RegionMap, !Ref "AWS::Region", TransitGatewayId]
       
   DmzRoutePrivate3:
